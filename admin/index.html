@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Administrativo — AS Estamparia</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="../assets/logo-as-estamparia.png">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page="admin">
+
+<div class="admin-shell">
+  <aside class="admin-side">
+    <div class="brand">
+      <img src="../assets/logo-as-estamparia.png" alt="AS Estamparia" style="height:38px;">
+      <span class="brand-word">AS Estamparia<small>Painel Admin</small></span>
+    </div>
+    <nav class="admin-nav" id="admin-nav">
+      <button data-panel="dashboard" class="active">Visão geral</button>
+      <button data-panel="pedidos">Pedidos</button>
+      <button data-panel="produtos">Produtos</button>
+      <button data-panel="cupons">Cupons</button>
+      <button data-panel="config">Configurações</button>
+    </nav>
+    <a href="../index.html" class="link-arrow" style="color:var(--turquesa-claro);margin-top:36px;display:inline-flex;">← Voltar ao site</a>
+  </aside>
+
+  <main class="admin-main">
+    <div class="notice-box" style="margin-bottom:24px;background:#FFF3D6;border-color:#E9CE8A;">
+      <p><strong>Protótipo front-end:</strong> este painel lê e grava dados no navegador (localStorage). Antes de publicar, conecte um backend com login seguro, banco de dados e controle de acesso por usuário.</p>
+    </div>
+
+    <!-- ===================== DASHBOARD ===================== -->
+    <section class="admin-panel active" id="panel-dashboard">
+      <div class="admin-head"><h1>Visão geral</h1></div>
+      <div class="kpi-row" id="kpi-row"></div>
+      <div class="card-panel">
+        <h3 style="color:var(--roxo);margin-bottom:14px;">Últimos pedidos</h3>
+        <div class="table-wrap"><table class="data-table" id="dash-orders-table"><thead><tr><th>Nº</th><th>Cliente</th><th>Itens</th><th>Status</th><th>Data</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- ===================== PEDIDOS ===================== -->
+    <section class="admin-panel" id="panel-pedidos">
+      <div class="admin-head"><h1>Pedidos</h1></div>
+      <div class="table-wrap"><table class="data-table" id="orders-table"><thead><tr><th>Nº</th><th>Cliente</th><th>WhatsApp</th><th>Itens</th><th>Data</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <!-- ===================== PRODUTOS ===================== -->
+    <section class="admin-panel" id="panel-produtos">
+      <div class="admin-head">
+        <h1>Produtos</h1>
+        <span style="font-size:.8rem;color:var(--ink-soft);max-width:360px;">Catálogo definido em <code>js/products.js</code>. Use os botões abaixo para destacar/ocultar na vitrine (salvo neste navegador).</span>
+      </div>
+      <div class="table-wrap"><table class="data-table" id="products-table"><thead><tr><th></th><th>Produto</th><th>Categoria</th><th>Preço</th><th>Destaque</th></tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <!-- ===================== CUPONS ===================== -->
+    <section class="admin-panel" id="panel-cupons">
+      <div class="admin-head"><h1>Cupons de desconto</h1></div>
+      <form class="card-panel" id="coupon-form" style="max-width:520px;margin-bottom:24px;">
+        <div class="field-row">
+          <div class="field"><label>Código</label><input type="text" id="new-coupon-code" placeholder="EX: BEMVINDO10" required></div>
+          <div class="field"><label>Desconto (%)</label><input type="number" id="new-coupon-percent" min="1" max="90" required></div>
+        </div>
+        <button class="btn" type="submit">Adicionar cupom</button>
+      </form>
+      <div class="table-wrap"><table class="data-table" id="coupons-table"><thead><tr><th>Código</th><th>Desconto</th><th>Status</th><th></th></tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <!-- ===================== CONFIG ===================== -->
+    <section class="admin-panel" id="panel-config">
+      <div class="admin-head"><h1>Configurações de contato</h1></div>
+      <div class="card-panel" style="max-width:600px;">
+        <p style="color:var(--ink-soft);font-size:.9rem;margin-bottom:16px;">Estes dados vêm do arquivo <code>js/config.js</code>. Edite o arquivo diretamente para atualizar WhatsApp, e-mail, endereço, horários e formas de pagamento em todo o site.</p>
+        <table class="data-table"><tbody id="config-preview"></tbody></table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toast-stack"></div>
+
+<script src="../js/config.js"></script>
+<script src="../js/products.js"></script>
+<script src="../js/store.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+  document.querySelector(".admin-main .notice-box").insertAdjacentHTML("afterbegin", Icons.shield);
+
+  document.querySelectorAll("#admin-nav button").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll("#admin-nav button").forEach(b=>b.classList.remove("active"));
+      document.querySelectorAll(".admin-panel").forEach(p=>p.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById("panel-"+btn.dataset.panel).classList.add("active");
+    });
+  });
+
+  function renderDashboard(){
+    const orders = Orders.all();
+    const producao = orders.filter(o=>o.status==="producao").length;
+    const coupons = Coupons.all().filter(c=>c.active).length;
+    document.getElementById("kpi-row").innerHTML = `
+      <div class="kpi-card"><div class="num">${orders.length}</div><div class="lbl">Pedidos recebidos</div></div>
+      <div class="kpi-card"><div class="num">${producao}</div><div class="lbl">Em produção</div></div>
+      <div class="kpi-card"><div class="num">${window.AS_PRODUCTS.length}</div><div class="lbl">Produtos no catálogo</div></div>
+      <div class="kpi-card"><div class="num">${coupons}</div><div class="lbl">Cupons ativos</div></div>
+    `;
+    document.querySelector("#dash-orders-table tbody").innerHTML = orders.slice(0,6).map(o=>`
+      <tr><td>${o.id}</td><td>${o.customerName}</td><td>${o.items.length} item(ns)</td><td><span class="order-status ${o.status}">${ORDER_LABELS[o.status]}</span></td><td>${formatDate(o.date)}</td></tr>
+    `).join("") || `<tr><td colspan="5" style="color:var(--ink-soft);">Nenhum pedido registrado ainda.</td></tr>`;
+  }
+
+  function renderOrdersTable(){
+    const orders = Orders.all();
+    document.querySelector("#orders-table tbody").innerHTML = orders.map(o=>`
+      <tr>
+        <td>${o.id}</td><td>${o.customerName}</td><td>${o.phone||"—"}</td>
+        <td>${o.items.map(i=>`${i.qty}x ${i.name}`).join(", ")}</td>
+        <td>${formatDate(o.date)}</td>
+        <td>
+          <select data-order="${o.id}" class="sort-select" style="padding:6px 10px;font-size:.75rem;">
+            ${ORDER_STAGES.map(s=>`<option value="${s}" ${s===o.status?'selected':''}>${ORDER_LABELS[s]}</option>`).join("")}
+          </select>
+        </td>
+      </tr>`).join("") || `<tr><td colspan="6" style="color:var(--ink-soft);">Nenhum pedido registrado ainda.</td></tr>`;
+    document.querySelectorAll("[data-order]").forEach(sel=>{
+      sel.addEventListener("change", ()=>{
+        Orders.updateStatus(sel.dataset.order, sel.value);
+        toast("Status do pedido atualizado.","success");
+        renderDashboard();
+      });
+    });
+  }
+
+  function readOverrides(){ return readLS("as_product_overrides", {}); }
+  function renderProductsTable(){
+    const overrides = readOverrides();
+    document.querySelector("#products-table tbody").innerHTML = window.AS_PRODUCTS.map(p=>{
+      const featured = overrides[p.id]?.featured ?? !!p.featured;
+      const media = p.image ? `<img src="../${p.image}" alt="">` : `<div style="width:44px;height:44px;">${categoryArtSVG(p.icon,44)}</div>`;
+      return `<tr>
+        <td>${media}</td>
+        <td>${p.name}</td>
+        <td>${getCategory(p.category)?.name||""}</td>
+        <td>Sob consulta</td>
+        <td><button class="mini-btn" data-toggle-featured="${p.id}">${featured?"★ Em destaque":"☆ Destacar"}</button></td>
+      </tr>`;
+    }).join("");
+    document.querySelectorAll("[data-toggle-featured]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const id = btn.dataset.toggleFeatured;
+        const overrides = readOverrides();
+        const current = overrides[id]?.featured ?? !!getProductById(id).featured;
+        overrides[id] = {...(overrides[id]||{}), featured: !current};
+        writeLS("as_product_overrides", overrides);
+        renderProductsTable();
+        toast("Preferência de destaque salva neste navegador.");
+      });
+    });
+  }
+
+  function renderCouponsTable(){
+    const list = Coupons.all();
+    document.querySelector("#coupons-table tbody").innerHTML = list.map(c=>`
+      <tr><td><strong>${c.code}</strong></td><td>${c.percent}%</td><td>${c.active?"Ativo":"Inativo"}</td>
+      <td><button class="mini-btn" data-remove-coupon="${c.code}">Remover</button></td></tr>
+    `).join("") || `<tr><td colspan="4" style="color:var(--ink-soft);">Nenhum cupom cadastrado ainda.</td></tr>`;
+    document.querySelectorAll("[data-remove-coupon]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{ Coupons.remove(btn.dataset.removeCoupon); renderCouponsTable(); renderDashboard(); toast("Cupom removido."); });
+    });
+  }
+  document.getElementById("coupon-form").addEventListener("submit",(e)=>{
+    e.preventDefault();
+    const code = document.getElementById("new-coupon-code").value.trim();
+    const percent = document.getElementById("new-coupon-percent").value;
+    if(!code || !percent) return;
+    Coupons.add(code, percent);
+    e.target.reset();
+    renderCouponsTable(); renderDashboard();
+    toast("Cupom adicionado!","success");
+  });
+
+  function renderConfigPreview(){
+    const c = window.AS_CONFIG;
+    const rows = [
+      ["WhatsApp", c.whatsappNumber || "[a definir]"],
+      ["E-mail", c.email || "[a definir]"],
+      ["Instagram", c.instagram || "[a definir]"],
+      ["Endereço", c.address || "[a definir]"],
+      ["Horário", c.hours || "[a definir]"],
+      ["Pagamento", c.paymentMethods || "[a definir]"],
+      ["Entrega", c.deliveryInfo || "[a definir]"]
+    ];
+    document.getElementById("config-preview").innerHTML = rows.map(([k,v])=>`<tr><td style="font-weight:700;color:var(--roxo);width:140px;">${k}</td><td>${v}</td></tr>`).join("");
+  }
+
+  renderDashboard();
+  renderOrdersTable();
+  renderProductsTable();
+  renderCouponsTable();
+  renderConfigPreview();
+</script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personalize / Criamos Sua Arte — AS Estamparia</title>
+<meta name="description" content="Tem uma ideia mas ainda não tem a arte pronta? Envie sua ideia, foto, frase ou logotipo e converse com a AS Estamparia sobre as possibilidades.">
+<link rel="icon" href="assets/logo-as-estamparia.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="personalize">
+
+<div class="announce">✂️ Personalização sob medida — conte sua ideia e receba um orçamento pelo <strong>WhatsApp</strong></div>
+<header class="site-header">
+  <div class="header-row">
+    <a href="index.html" class="brand"><img src="assets/logo-as-estamparia.png" alt="AS Estamparia"><span class="brand-word">AS Estamparia<small>Personalizados</small></span></a>
+    <nav class="main-nav" data-main-nav>
+      <a href="index.html" data-nav="home">Início</a>
+      <a href="produtos.html" data-nav="produtos">Produtos</a>
+      <a href="presentes.html" data-nav="presentes">Presentes</a>
+      <a href="empresas.html" data-nav="empresas">Para Empresas</a>
+      <a href="personalize.html" data-nav="personalize">Personalize</a>
+      <a href="sobre.html" data-nav="sobre">Sobre</a>
+      <a href="contato.html" data-nav="contato">Contato</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" data-search-toggle aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
+      <a class="icon-btn" href="conta.html" aria-label="Minha conta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.6-4 5-6 8-6s6.4 2 8 6"/></svg></a>
+      <a class="icon-btn" href="favoritos.html" aria-label="Favoritos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg><span class="count" data-fav-count style="display:none">0</span></a>
+      <a class="icon-btn" href="carrinho.html" aria-label="Carrinho"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.5 2.5h3l2.7 12.9a2 2 0 0 0 2 1.6h8.3a2 2 0 0 0 2-1.6l1.3-7.4H6.2"/></svg><span class="count" data-cart-count style="display:none">0</span></a>
+      <a class="btn btn-sm header-cta" href="produtos.html">Fazer Pedido</a>
+      <button class="hamburger" data-hamburger aria-label="Abrir menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" width="22" height="22"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    </div>
+    <div class="nav-backdrop" data-nav-backdrop></div>
+  </div>
+  <div class="search-panel" data-search-panel><form data-search-form><input type="text" name="busca" placeholder="Buscar camisetas, canecas, quadros..."><button class="btn btn-sm" type="submit">Buscar</button></form></div>
+</header>
+
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow">Sem arte pronta?</span>
+    <h1>Tem uma ideia, mas ainda não tem a arte pronta?</h1>
+    <p>Sem problema. Você pode nos enviar sua ideia, foto, frase, referência ou logotipo e conversar com nossa equipe sobre as possibilidades de personalização. Antes da produção, combinamos os detalhes para o produto ficar do jeito que você imaginou.</p>
+  </div>
+</section>
+
+<section class="page-body">
+  <div class="container">
+    <nav class="breadcrumb"><a href="index.html">Início</a><span class="sep">/</span><span>Personalize</span></nav>
+
+    <div class="section-head center">
+      <span class="eyebrow" style="justify-content:center">Comece por aqui</span>
+      <h2>Já sabe o produto? Escolha uma categoria</h2>
+      <p>Você também pode ir direto ao catálogo e montar sua personalização na página do produto.</p>
+    </div>
+    <div class="grid-cats" id="cats-grid" style="margin-bottom:70px;"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:flex-start;" id="idea-section">
+      <div>
+        <span class="eyebrow">Conte sua ideia</span>
+        <h2 style="font-size:1.8rem;">Envie sua ideia para a gente</h2>
+        <p style="color:var(--ink-soft);margin-top:14px;">Preencha o formulário com o máximo de detalhes possível. Você também pode anexar uma foto, referência ou logotipo — aceitamos JPG, PNG, PDF e SVG.</p>
+
+        <div class="icon-row" style="grid-template-columns:1fr;margin-top:30px;gap:14px;">
+          <div class="icon-item"><div class="ic">${''}</div><h4>1. Conte sua ideia</h4><p>Descreva o produto, a ocasião e o estilo que imagina.</p></div>
+          <div class="icon-item"><div class="ic">${''}</div><h4>2. Nossa equipe responde</h4><p>Conversamos sobre possibilidades, prazo e valores pelo WhatsApp.</p></div>
+          <div class="icon-item"><div class="ic">${''}</div><h4>3. Aprovação e produção</h4><p>Você confere a arte antes de produzirmos, quando aplicável.</p></div>
+        </div>
+      </div>
+
+      <form class="card-panel" id="idea-form">
+        <div class="field"><label>Seu nome</label><input type="text" required placeholder="Como podemos te chamar?"></div>
+        <div class="field-row">
+          <div class="field"><label>WhatsApp / telefone</label><input type="tel" required placeholder="(00) 00000-0000"></div>
+          <div class="field"><label>Produto de interesse</label>
+            <select id="idea-category">
+              <option value="">Ainda não sei</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label>Conte sua ideia</label><textarea rows="4" required placeholder="Ex: quero uma camiseta com a foto do meu cachorro e o nome dele embaixo..."></textarea></div>
+        <div class="field">
+          <label>Anexar referência <span class="hint">(opcional — JPG, PNG, PDF ou SVG)</span></label>
+          <label class="upload-zone" id="idea-upload-zone" style="padding:20px;">
+            ${Icons.upload}
+            <p><strong>Clique para enviar</strong> uma foto ou referência</p>
+            <input type="file" id="idea-file-input" accept=".jpg,.jpeg,.png,.pdf,.svg" multiple style="display:none;">
+          </label>
+          <div class="upload-list" id="idea-upload-list"></div>
+        </div>
+        <label class="checkbox-line" style="margin-bottom:18px;"><input type="checkbox" checked> Quero aprovar a arte antes da produção</label>
+        <button class="btn btn-block btn-lg" type="submit">Tenho Uma Ideia — Enviar pelo WhatsApp</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div class="footer-brand"><img src="assets/logo-as-estamparia.png" alt="AS Estamparia"></div>
+        <p class="footer-slogan">"Sua ideia. Seu estilo. Do seu jeito."</p>
+        <p>Produtos personalizados para transformar momentos, ideias e marcas em algo único.</p>
+        <div class="footer-social">
+          <a href="#" data-instagram-link aria-label="Instagram"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>
+          <a href="#" data-wa-btn aria-label="WhatsApp"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.1.2-.3.3-.4.1-.2 0-.4 0-.5S9.4 7.8 9.2 7.3c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.6 1.1 2.8c.1.2 1.8 2.8 4.5 3.9.6.3 1.1.4 1.5.6.6.2 1.2.2 1.6.1.5-.1 1.7-.7 1.9-1.3.2-.6.2-1.1.2-1.3-.1-.1-.3-.2-.6-.3Z"/><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Z"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col"><h5>Navegação</h5><ul>
+        <li><a href="index.html">Início</a></li><li><a href="produtos.html">Produtos</a></li>
+        <li><a href="presentes.html">Presentes</a></li><li><a href="empresas.html">Para Empresas</a></li>
+        <li><a href="personalize.html">Personalize</a></li><li><a href="sobre.html">Sobre</a></li>
+      </ul></div>
+      <div class="footer-col"><h5>Minha Conta</h5><ul>
+        <li><a href="conta.html">Entrar / Cadastrar</a></li><li><a href="favoritos.html">Favoritos</a></li>
+        <li><a href="carrinho.html">Carrinho</a></li><li><a href="galeria.html">Galeria</a></li>
+        <li><a href="contato.html">Perguntas frequentes</a></li>
+      </ul></div>
+      <div class="footer-col"><h5>Contato</h5><ul>
+        <li>📍 <span data-info="address">[Endereço a definir]</span></li>
+        <li>💬 <span data-info="whatsapp">[WhatsApp a definir]</span></li>
+        <li>✉️ <span data-info="email">[E-mail a definir]</span></li>
+        <li>🕒 <span data-info="hours">[Horário a definir]</span></li>
+      </ul></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> AS Estamparia. Todos os direitos reservados.</span>
+      <span class="placeholder-note">Site em fase de configuração — dados de contato a definir.</span>
+    </div>
+  </div>
+</footer>
+<div id="toast-stack"></div>
+<button id="back-top" aria-label="Voltar ao topo">↑</button>
+
+<script src="js/config.js"></script>
+<script src="js/products.js"></script>
+<script src="js/store.js"></script>
+<script src="js/ui.js"></script>
+<script>
+  renderGrid(document.getElementById("cats-grid"), window.AS_CATEGORIES, categoryCardHTML);
+
+  document.getElementById("idea-category").innerHTML += window.AS_CATEGORIES.map(c=>`<option value="${c.slug}">${c.name}</option>`).join("");
+
+  document.querySelectorAll("#idea-section .icon-item .ic").forEach((el,i)=>{
+    el.innerHTML = [Icons.chat, Icons.mail, Icons.check][i];
+  });
+
+  let ideaFiles = [];
+  const ideaZone = document.getElementById("idea-upload-zone");
+  const ideaInput = document.getElementById("idea-file-input");
+  ideaZone.addEventListener("click", e=>{ e.preventDefault(); ideaInput.click(); });
+  ideaInput.addEventListener("change", ()=>{
+    Array.from(ideaInput.files).forEach(f=>{
+      const ext = f.name.split(".").pop().toLowerCase();
+      if(!["jpg","jpeg","png","pdf","svg"].includes(ext)){ toast("Formato não aceito: "+f.name); return; }
+      ideaFiles.push(f.name);
+    });
+    document.getElementById("idea-upload-list").innerHTML = ideaFiles.map((n,i)=>`<span class="upload-chip"><span class="ic">${n.split(".").pop().toUpperCase().slice(0,3)}</span>${n}</span>`).join("");
+    ideaInput.value="";
+  });
+
+  document.getElementById("idea-form").addEventListener("submit",(e)=>{
+    e.preventDefault();
+    const inputs = e.target.querySelectorAll("input[type=text], input[type=tel]");
+    const name = inputs[0].value, phone = inputs[1].value;
+    const category = document.getElementById("idea-category").value;
+    const idea = e.target.querySelector("textarea").value;
+    let msg = `Olá! Tenho uma ideia para personalizar.\nNome: ${name}\nContato: ${phone}\n`;
+    if(category){ const c = getCategory(category); if(c) msg += `Categoria: ${c.name}\n`; }
+    msg += `Ideia: ${idea}\n`;
+    if(ideaFiles.length) msg += `Arquivos que vou enviar: ${ideaFiles.join(", ")}\n`;
+    goToWhatsApp(msg);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="doc-title">Produto Personalizado — AS Estamparia</title>
+<meta name="description" content="Personalize este produto com sua foto, frase, nome ou arte. Envie sua ideia e receba um orçamento pelo WhatsApp.">
+<link rel="icon" href="assets/logo-as-estamparia.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="produtos">
+
+<div class="announce">✂️ Personalização sob medida — conte sua ideia e receba um orçamento pelo <strong>WhatsApp</strong></div>
+<header class="site-header">
+  <div class="header-row">
+    <a href="index.html" class="brand">
+      <img src="assets/logo-as-estamparia.png" alt="AS Estamparia">
+      <span class="brand-word">AS Estamparia<small>Personalizados</small></span>
+    </a>
+    <nav class="main-nav" data-main-nav>
+      <a href="index.html" data-nav="home">Início</a>
+      <a href="produtos.html" data-nav="produtos">Produtos</a>
+      <a href="presentes.html" data-nav="presentes">Presentes</a>
+      <a href="empresas.html" data-nav="empresas">Para Empresas</a>
+      <a href="personalize.html" data-nav="personalize">Personalize</a>
+      <a href="sobre.html" data-nav="sobre">Sobre</a>
+      <a href="contato.html" data-nav="contato">Contato</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" data-search-toggle aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
+      <a class="icon-btn" href="conta.html" aria-label="Minha conta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.6-4 5-6 8-6s6.4 2 8 6"/></svg></a>
+      <a class="icon-btn" href="favoritos.html" aria-label="Favoritos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg><span class="count" data-fav-count style="display:none">0</span></a>
+      <a class="icon-btn" href="carrinho.html" aria-label="Carrinho"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.5 2.5h3l2.7 12.9a2 2 0 0 0 2 1.6h8.3a2 2 0 0 0 2-1.6l1.3-7.4H6.2"/></svg><span class="count" data-cart-count style="display:none">0</span></a>
+      <a class="btn btn-sm header-cta" href="produtos.html">Fazer Pedido</a>
+      <button class="hamburger" data-hamburger aria-label="Abrir menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" width="22" height="22"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    </div>
+    <div class="nav-backdrop" data-nav-backdrop></div>
+  </div>
+  <div class="search-panel" data-search-panel>
+    <form data-search-form><input type="text" name="busca" placeholder="Buscar camisetas, canecas, quadros..."><button class="btn btn-sm" type="submit">Buscar</button></form>
+  </div>
+</header>
+
+<div class="container">
+  <nav class="breadcrumb" id="breadcrumb"></nav>
+</div>
+
+<section class="page-body" style="padding-top:6px;">
+  <div class="container">
+    <div class="product-layout" id="product-layout">
+      <!-- preenchido via JS -->
+    </div>
+
+    <!-- ===================== FLUXO DE PERSONALIZAÇÃO ===================== -->
+    <div class="custom-flow" id="custom-flow-wrap" style="max-width:900px;margin:56px auto 0;">
+      <div class="section-head">
+        <span class="eyebrow">Monte sua personalização</span>
+        <h2 style="font-size:1.7rem;">Como você quer o seu produto?</h2>
+        <p>Siga as etapas abaixo. Você pode revisar tudo antes de enviar.</p>
+      </div>
+      <div class="custom-flow" id="custom-flow"></div>
+
+      <div class="notice-box" style="margin-top:22px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+        <p>A visualização é uma prévia. A arte final poderá passar por ajustes antes da produção.</p>
+      </div>
+
+      <div class="sticky-actions">
+        <button class="btn btn-lg" id="add-to-cart-btn">Adicionar ao Carrinho</button>
+        <a href="#" class="btn btn-wa btn-lg" id="wa-product-btn">Falar no WhatsApp</a>
+      </div>
+    </div>
+
+    <!-- ===================== TABS: descrição / avaliações ===================== -->
+    <div style="max-width:900px;margin:10px auto 0;">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="desc">Descrição</button>
+        <button class="tab-btn" data-tab="reviews">Avaliações</button>
+      </div>
+      <div class="tab-panel active" id="tab-desc"></div>
+      <div class="tab-panel" id="tab-reviews">
+        <div id="reviews-list"></div>
+        <div class="card-panel" style="margin-top:18px;">
+          <h4 style="color:var(--roxo);margin-bottom:10px;">Deixe sua avaliação</h4>
+          <form id="review-form">
+            <div class="field"><label>Seu nome</label><input type="text" required placeholder="Como podemos te chamar?"></div>
+            <div class="field"><label>Nota</label>
+              <div class="pill-options" id="rating-picker">
+                ${[1,2,3,4,5].map(n=>`<button type="button" class="pill-opt" data-rating="${n}">${n} ★</button>`).join("")}
+              </div>
+            </div>
+            <div class="field"><label>Comentário</label><textarea rows="3" required placeholder="Conte como foi sua experiência"></textarea></div>
+            <button class="btn" type="submit">Enviar avaliação</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Relacionados -->
+    <div style="max-width:1200px;margin:70px auto 0;">
+      <div class="section-head"><span class="eyebrow">Você também pode gostar</span><h2 style="font-size:1.6rem;">Produtos relacionados</h2></div>
+      <div class="grid-products" id="related-grid"></div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div class="footer-brand"><img src="assets/logo-as-estamparia.png" alt="AS Estamparia"></div>
+        <p class="footer-slogan">"Sua ideia. Seu estilo. Do seu jeito."</p>
+        <p>Produtos personalizados para transformar momentos, ideias e marcas em algo único.</p>
+        <div class="footer-social">
+          <a href="#" data-instagram-link aria-label="Instagram"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>
+          <a href="#" data-wa-btn aria-label="WhatsApp"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.1.2-.3.3-.4.1-.2 0-.4 0-.5S9.4 7.8 9.2 7.3c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.6 1.1 2.8c.1.2 1.8 2.8 4.5 3.9.6.3 1.1.4 1.5.6.6.2 1.2.2 1.6.1.5-.1 1.7-.7 1.9-1.3.2-.6.2-1.1.2-1.3-.1-.1-.3-.2-.6-.3Z"/><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Z"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col"><h5>Navegação</h5><ul>
+        <li><a href="index.html">Início</a></li><li><a href="produtos.html">Produtos</a></li>
+        <li><a href="presentes.html">Presentes</a></li><li><a href="empresas.html">Para Empresas</a></li>
+        <li><a href="personalize.html">Personalize</a></li><li><a href="sobre.html">Sobre</a></li>
+      </ul></div>
+      <div class="footer-col"><h5>Minha Conta</h5><ul>
+        <li><a href="conta.html">Entrar / Cadastrar</a></li><li><a href="favoritos.html">Favoritos</a></li>
+        <li><a href="carrinho.html">Carrinho</a></li><li><a href="galeria.html">Galeria</a></li>
+        <li><a href="contato.html">Perguntas frequentes</a></li>
+      </ul></div>
+      <div class="footer-col"><h5>Contato</h5><ul>
+        <li>📍 <span data-info="address">[Endereço a definir]</span></li>
+        <li>💬 <span data-info="whatsapp">[WhatsApp a definir]</span></li>
+        <li>✉️ <span data-info="email">[E-mail a definir]</span></li>
+        <li>🕒 <span data-info="hours">[Horário a definir]</span></li>
+      </ul></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> AS Estamparia. Todos os direitos reservados.</span>
+      <span class="placeholder-note">Site em fase de configuração — dados de contato a definir.</span>
+    </div>
+  </div>
+</footer>
+<div id="toast-stack"></div>
+<button id="back-top" aria-label="Voltar ao topo">↑</button>
+
+<script src="js/config.js"></script>
+<script src="js/products.js"></script>
+<script src="js/store.js"></script>
+<script src="js/ui.js"></script>
+<script>
+const pid = new URLSearchParams(location.search).get("id") || window.AS_PRODUCTS[0].id;
+const product = getProductById(pid) || window.AS_PRODUCTS[0];
+const cat = getCategory(product.category);
+document.getElementById("doc-title").textContent = product.name + " — AS Estamparia";
+
+document.getElementById("breadcrumb").innerHTML = `
+  <a href="index.html">Início</a><span class="sep">/</span>
+  <a href="produtos.html">Produtos</a><span class="sep">/</span>
+  <a href="produtos.html?categoria=${product.category}">${cat?cat.name:''}</a><span class="sep">/</span>
+  <span>${product.name}</span>`;
+
+const gallery = (product.gallery && product.gallery.length) ? product.gallery : (product.image ? [product.image] : []);
+const mainMediaHTML = gallery.length
+  ? `<img id="gallery-main-img" src="${gallery[0]}" alt="${product.name}">`
+  : categoryArtSVG(product.icon, 260);
+
+document.getElementById("product-layout").innerHTML = `
+  <div>
+    <div class="gallery-main" id="gallery-main">${mainMediaHTML}</div>
+    ${gallery.length > 1 ? `<div class="gallery-thumbs">${gallery.map((g,i)=>`<button class="${i===0?'active':''}" data-src="${g}"><img src="${g}" alt="Miniatura ${i+1}"></button>`).join("")}</div>` : ""}
+  </div>
+  <div class="product-info">
+    <span class="product-cat badge">${cat?cat.name:''}</span>
+    <h1 style="margin-top:12px;">${product.name}</h1>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+      ${(product.badges||[]).map(b=>`<span class="badge roxo">${b}</span>`).join("")}
+    </div>
+    <div class="price-block">
+      <div class="price">Sob consulta</div>
+      <div class="note">O valor final depende do modelo, tamanho, quantidade e tipo de personalização. Peça um orçamento sem compromisso.</div>
+    </div>
+    <p class="product-desc">${product.shortDesc}</p>
+    <div class="meta-row">
+      <div class="meta-item">${Icons.clock}<span><b>Prazo estimado</b>Informado no orçamento, conforme o produto e a fila de produção.</span></div>
+      <div class="meta-item">${Icons.brush}<span><b>Personalização</b>Envie foto, frase, nome, logotipo ou referência.</span></div>
+      <div class="meta-item">${Icons.shield}<span><b>Aprovação</b>Você pode revisar a arte antes de produzirmos.</span></div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="fav-toggle" style="position:static;" data-fav="${product.id}">${Favorites.has(product.id)?Icons.heartFill:Icons.heart}</button>
+      <span style="align-self:center;font-size:.85rem;color:var(--ink-soft);">Adicionar aos favoritos</span>
+    </div>
+  </div>
+`;
+document.getElementById("tab-desc").innerHTML = `<p style="color:var(--ink-soft);font-size:.98rem;line-height:1.7;max-width:760px;">${product.description}</p>`;
+wireFavButtons();
+
+// Galeria: zoom + thumbs
+const galleryMain = document.getElementById("gallery-main");
+galleryMain?.addEventListener("click", ()=> galleryMain.classList.toggle("zoomed"));
+document.querySelectorAll(".gallery-thumbs button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".gallery-thumbs button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("gallery-main-img").src = btn.getAttribute("data-src");
+    galleryMain.classList.remove("zoomed");
+  });
+});
+
+/* ===================== Fluxo de personalização ===================== */
+const sizes = ["PP","P","M","G","GG"];
+const colors = [
+  {n:"Branco", hex:"#FFFFFF"}, {n:"Preto", hex:"#1a1a1a"}, {n:"Roxo AS", hex:"#6D2C91"}, {n:"Turquesa", hex:"#46C5BE"}
+];
+let uploadedFiles = [];
+const selection = { model: product.name, size:"", color:"", type:"", approval:true };
+
+document.getElementById("custom-flow").innerHTML = `
+  <div class="custom-step">
+    <h4><span class="n">1</span>Escolha do modelo</h4>
+    <p style="font-size:.85rem;color:var(--ink-soft);margin-bottom:10px;">Modelo selecionado: <strong>${product.name}</strong>. Para ver outros modelos, <a class="link-arrow" href="produtos.html?categoria=${product.category}">volte ao catálogo</a>.</p>
+  </div>
+  <div class="custom-step">
+    <h4><span class="n">2</span>Escolha do tamanho</h4>
+    <div class="pill-options" id="size-options">${sizes.map(s=>`<button type="button" class="pill-opt" data-size="${s}">${s}</button>`).join("")}</div>
+  </div>
+  <div class="custom-step">
+    <h4><span class="n">3</span>Escolha da cor</h4>
+    <div class="color-swatches" id="color-options">${colors.map(c=>`<button type="button" class="swatch" data-color="${c.n}" style="background:${c.hex}" title="${c.n}"></button>`).join("")}</div>
+  </div>
+  <div class="custom-step">
+    <h4><span class="n">4</span>Tipo de personalização</h4>
+    <div class="pill-options" id="type-options">
+      ${["Foto","Frase / Texto","Nome","Logotipo / Arte própria","Quero ajuda para criar a arte"].map(t=>`<button type="button" class="pill-opt" data-type="${t}">${t}</button>`).join("")}
+    </div>
+  </div>
+  <div class="custom-step">
+    <h4><span class="n">5</span>Upload da arte</h4>
+    <label class="upload-zone" id="upload-zone">
+      ${Icons.upload}
+      <p><strong>Clique para enviar</strong> ou arraste seus arquivos aqui</p>
+      <p style="font-size:.72rem;margin-top:4px;">Aceitamos JPG, PNG, PDF e SVG</p>
+      <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.pdf,.svg" multiple style="display:none;">
+    </label>
+    <div class="upload-list" id="upload-list"></div>
+  </div>
+  <div class="custom-step">
+    <h4><span class="n">6</span>Frase, nome ou observações</h4>
+    <div class="field" style="margin-bottom:0;">
+      <textarea id="obs-field" rows="3" placeholder="Ex: nome 'Maria', frase 'Família é tudo', cor de fundo, referência de estilo..."></textarea>
+    </div>
+  </div>
+  <div class="custom-step">
+    <h4><span class="n">7</span>Aprovação da arte</h4>
+    <label class="checkbox-line"><input type="checkbox" id="approval-check" checked> Quero aprovar a arte antes da produção (recomendado)</label>
+  </div>
+`;
+
+document.querySelectorAll("#size-options .pill-opt").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("#size-options .pill-opt").forEach(x=>x.classList.remove("selected"));
+  b.classList.add("selected"); selection.size = b.dataset.size;
+}));
+document.querySelectorAll("#color-options .swatch").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("#color-options .swatch").forEach(x=>x.classList.remove("selected"));
+  b.classList.add("selected"); selection.color = b.dataset.color;
+}));
+document.querySelectorAll("#type-options .pill-opt").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("#type-options .pill-opt").forEach(x=>x.classList.remove("selected"));
+  b.classList.add("selected"); selection.type = b.dataset.type;
+}));
+
+const uploadZone = document.getElementById("upload-zone");
+const fileInput = document.getElementById("file-input");
+uploadZone.addEventListener("click", (e)=>{ e.preventDefault(); fileInput.click(); });
+fileInput.addEventListener("change", ()=>{
+  const allowed = ["image/jpeg","image/png","application/pdf","image/svg+xml"];
+  Array.from(fileInput.files).forEach(f=>{
+    const ext = f.name.split(".").pop().toLowerCase();
+    if(!["jpg","jpeg","png","pdf","svg"].includes(ext)){ toast("Formato não aceito: "+f.name); return; }
+    if(f.size > 15*1024*1024){ toast("Arquivo muito grande (máx. 15MB): "+f.name); return; }
+    uploadedFiles.push(f.name);
+  });
+  renderUploadList();
+  fileInput.value = "";
+});
+function renderUploadList(){
+  document.getElementById("upload-list").innerHTML = uploadedFiles.map((name,i)=>`
+    <span class="upload-chip"><span class="ic">${name.split(".").pop().toUpperCase().slice(0,3)}</span>${name}<button data-remove="${i}">${Icons.close}</button></span>
+  `).join("");
+  document.querySelectorAll("[data-remove]").forEach(btn=>btn.addEventListener("click", ()=>{
+    uploadedFiles.splice(Number(btn.dataset.remove),1); renderUploadList();
+  }));
+}
+
+function buildWaMessage(){
+  let msg = `Olá! Quero personalizar o produto: *${product.name}*\n`;
+  if(selection.size) msg += `Tamanho: ${selection.size}\n`;
+  if(selection.color) msg += `Cor: ${selection.color}\n`;
+  if(selection.type) msg += `Personalização: ${selection.type}\n`;
+  const obs = document.getElementById("obs-field")?.value.trim();
+  if(obs) msg += `Observações: ${obs}\n`;
+  if(uploadedFiles.length) msg += `Arquivos que vou enviar: ${uploadedFiles.join(", ")}\n`;
+  const approval = document.getElementById("approval-check")?.checked;
+  msg += `Aprovação antes da produção: ${approval ? "sim":"não"}\n`;
+  msg += `\n(Link do produto: ${location.href})`;
+  return msg;
+}
+
+document.getElementById("wa-product-btn").addEventListener("click",(e)=>{
+  e.preventDefault();
+  goToWhatsApp(buildWaMessage());
+});
+
+document.getElementById("add-to-cart-btn").addEventListener("click", ()=>{
+  const obs = document.getElementById("obs-field")?.value.trim();
+  const approval = document.getElementById("approval-check")?.checked;
+  const key = [product.id, selection.size, selection.color, selection.type].join("|");
+  Cart.add({
+    key, id:product.id, name:product.name, image: product.image || null, icon: product.icon || null,
+    size:selection.size, color:selection.color, type:selection.type, obs, approval, files:[...uploadedFiles], qty:1
+  });
+  toast("Produto adicionado ao carrinho!", "success");
+});
+
+/* ===================== Tabs ===================== */
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("tab-"+btn.dataset.tab).classList.add("active");
+  });
+});
+
+/* ===================== Avaliações (exemplo local) ===================== */
+const sampleReviews = [
+  {name:"Cliente AS Estamparia", rating:5, date:new Date(Date.now()-12*86400000).toISOString(), text:"Ficou exatamente como combinamos, capricho em cada detalhe!"},
+  {name:"Cliente AS Estamparia", rating:5, date:new Date(Date.now()-40*86400000).toISOString(), text:"Super recomendo, atendimento atencioso do início ao fim."}
+];
+function renderReviews(){
+  const reviewsKey = "as_reviews_" + product.id;
+  const extra = readLS(reviewsKey, []);
+  const all = [...extra, ...sampleReviews];
+  document.getElementById("reviews-list").innerHTML = all.map(r=>`
+    <div class="review-card">
+      <div class="review-head">
+        <span class="review-name">${r.name}</span>
+        <span class="stars">${Array(r.rating).fill(Icons.star).join("")}</span>
+      </div>
+      <p>${r.text}</p>
+      <div class="review-date">${formatDate(r.date)}</div>
+    </div>`).join("");
+}
+renderReviews();
+
+let chosenRating = 5;
+document.querySelectorAll("#rating-picker .pill-opt").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("#rating-picker .pill-opt").forEach(x=>x.classList.remove("selected"));
+  b.classList.add("selected"); chosenRating = Number(b.dataset.rating);
+}));
+document.getElementById("review-form").addEventListener("submit", (e)=>{
+  e.preventDefault();
+  const name = e.target.querySelector('input[type=text]').value.trim() || "Cliente AS Estamparia";
+  const text = e.target.querySelector('textarea').value.trim();
+  if(!text){ toast("Escreva um comentário antes de enviar."); return; }
+  const reviewsKey = "as_reviews_" + product.id;
+  const extra = readLS(reviewsKey, []);
+  extra.unshift({name, rating:chosenRating, date:new Date().toISOString(), text});
+  writeLS(reviewsKey, extra);
+  e.target.reset();
+  renderReviews();
+  toast("Obrigado pela sua avaliação!", "success");
+});
+
+/* ===================== Relacionados ===================== */
+const related = window.AS_PRODUCTS.filter(p=>p.category===product.category && p.id!==product.id).slice(0,4);
+renderGrid(document.getElementById("related-grid"), related.length ? related : window.AS_PRODUCTS.filter(p=>p.id!==product.id).slice(0,4), productCardHTML);
+wireFavButtons();
+</script>
+</body>
+</html>

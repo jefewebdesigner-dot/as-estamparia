@@ -1,0 +1,12 @@
+# Arquivos de origem / referência que não fazem parte do site publicado
+Foto dos produtos/
+AS Estamparia.pdf
+prompts_completos_86_de_423.json
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.log
+
+# Estado interno de ferramentas locais (não faz parte do site)
+.claude/

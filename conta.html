@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minha Conta — AS Estamparia</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/logo-as-estamparia.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="conta">
+
+<div class="announce">✂️ Personalização sob medida — conte sua ideia e receba um orçamento pelo <strong>WhatsApp</strong></div>
+<header class="site-header">
+  <div class="header-row">
+    <a href="index.html" class="brand"><img src="assets/logo-as-estamparia.png" alt="AS Estamparia"><span class="brand-word">AS Estamparia<small>Personalizados</small></span></a>
+    <nav class="main-nav" data-main-nav>
+      <a href="index.html" data-nav="home">Início</a>
+      <a href="produtos.html" data-nav="produtos">Produtos</a>
+      <a href="presentes.html" data-nav="presentes">Presentes</a>
+      <a href="empresas.html" data-nav="empresas">Para Empresas</a>
+      <a href="personalize.html" data-nav="personalize">Personalize</a>
+      <a href="sobre.html" data-nav="sobre">Sobre</a>
+      <a href="contato.html" data-nav="contato">Contato</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" data-search-toggle aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
+      <a class="icon-btn" href="conta.html" aria-label="Minha conta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.6-4 5-6 8-6s6.4 2 8 6"/></svg></a>
+      <a class="icon-btn" href="favoritos.html" aria-label="Favoritos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg><span class="count" data-fav-count style="display:none">0</span></a>
+      <a class="icon-btn" href="carrinho.html" aria-label="Carrinho"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.5 2.5h3l2.7 12.9a2 2 0 0 0 2 1.6h8.3a2 2 0 0 0 2-1.6l1.3-7.4H6.2"/></svg><span class="count" data-cart-count style="display:none">0</span></a>
+      <a class="btn btn-sm header-cta" href="produtos.html">Fazer Pedido</a>
+      <button class="hamburger" data-hamburger aria-label="Abrir menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" width="22" height="22"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    </div>
+    <div class="nav-backdrop" data-nav-backdrop></div>
+  </div>
+  <div class="search-panel" data-search-panel><form data-search-form><input type="text" name="busca" placeholder="Buscar camisetas, canecas, quadros..."><button class="btn btn-sm" type="submit">Buscar</button></form></div>
+</header>
+
+<section class="page-body">
+  <div class="container" style="max-width:760px;">
+    <nav class="breadcrumb"><a href="index.html">Início</a><span class="sep">/</span><span>Minha Conta</span></nav>
+    <div id="account-area"></div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div class="footer-brand"><img src="assets/logo-as-estamparia.png" alt="AS Estamparia"></div>
+        <p class="footer-slogan">"Sua ideia. Seu estilo. Do seu jeito."</p>
+        <p>Produtos personalizados para transformar momentos, ideias e marcas em algo único.</p>
+        <div class="footer-social">
+          <a href="#" data-instagram-link aria-label="Instagram"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>
+          <a href="#" data-wa-btn aria-label="WhatsApp"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.1.2-.3.3-.4.1-.2 0-.4 0-.5S9.4 7.8 9.2 7.3c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.6 1.1 2.8c.1.2 1.8 2.8 4.5 3.9.6.3 1.1.4 1.5.6.6.2 1.2.2 1.6.1.5-.1 1.7-.7 1.9-1.3.2-.6.2-1.1.2-1.3-.1-.1-.3-.2-.6-.3Z"/><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Z"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col"><h5>Navegação</h5><ul>
+        <li><a href="index.html">Início</a></li><li><a href="produtos.html">Produtos</a></li>
+        <li><a href="presentes.html">Presentes</a></li><li><a href="empresas.html">Para Empresas</a></li>
+        <li><a href="personalize.html">Personalize</a></li><li><a href="sobre.html">Sobre</a></li>
+      </ul></div>
+      <div class="footer-col"><h5>Minha Conta</h5><ul>
+        <li><a href="conta.html">Entrar / Cadastrar</a></li><li><a href="favoritos.html">Favoritos</a></li>
+        <li><a href="carrinho.html">Carrinho</a></li><li><a href="galeria.html">Galeria</a></li>
+        <li><a href="contato.html">Perguntas frequentes</a></li>
+      </ul></div>
+      <div class="footer-col"><h5>Contato</h5><ul>
+        <li>📍 <span data-info="address">[Endereço a definir]</span></li>
+        <li>💬 <span data-info="whatsapp">[WhatsApp a definir]</span></li>
+        <li>✉️ <span data-info="email">[E-mail a definir]</span></li>
+        <li>🕒 <span data-info="hours">[Horário a definir]</span></li>
+      </ul></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> AS Estamparia. Todos os direitos reservados.</span>
+      <span class="placeholder-note">Site em fase de configuração — dados de contato a definir.</span>
+    </div>
+  </div>
+</footer>
+<div id="toast-stack"></div>
+<button id="back-top" aria-label="Voltar ao topo">↑</button>
+
+<script src="js/config.js"></script>
+<script src="js/products.js"></script>
+<script src="js/store.js"></script>
+<script src="js/ui.js"></script>
+<script>
+  const area = document.getElementById("account-area");
+
+  function renderLoggedOut(){
+    area.innerHTML = `
+      <div class="section-head"><span class="eyebrow">Minha conta</span><h1 style="color:var(--roxo);font-family:var(--font-display);font-size:1.9rem;">Entre ou crie sua conta</h1></div>
+      <div class="account-tabs">
+        <button class="active" data-tab="login">Entrar</button>
+        <button data-tab="cadastro">Criar conta</button>
+      </div>
+      <form class="card-panel" id="login-form">
+        <div class="field"><label>E-mail</label><input type="email" required></div>
+        <div class="field"><label>Senha</label><input type="password" required></div>
+        <button class="btn btn-block btn-lg" type="submit">Entrar</button>
+      </form>
+      <form class="card-panel hidden" id="cadastro-form">
+        <div class="field"><label>Nome</label><input type="text" required></div>
+        <div class="field"><label>E-mail</label><input type="email" required></div>
+        <div class="field"><label>Senha</label><input type="password" required minlength="4"></div>
+        <button class="btn btn-block btn-lg" type="submit">Criar Conta</button>
+      </form>
+      <p style="text-align:center;font-size:.8rem;color:var(--ink-soft);margin-top:16px;">Protótipo de loja: seus dados ficam salvos apenas neste navegador (localStorage), sem envio a nenhum servidor.</p>
+    `;
+    document.querySelectorAll(".account-tabs button").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        document.querySelectorAll(".account-tabs button").forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById("login-form").classList.toggle("hidden", btn.dataset.tab!=="login");
+        document.getElementById("cadastro-form").classList.toggle("hidden", btn.dataset.tab!=="cadastro");
+      });
+    });
+    document.getElementById("login-form").addEventListener("submit",(e)=>{
+      e.preventDefault();
+      const [email,pass] = e.target.querySelectorAll("input");
+      const r = Account.login(email.value, pass.value);
+      if(r.ok){ toast("Bem-vindo de volta!","success"); renderAccount(); } else { toast(r.error); }
+    });
+    document.getElementById("cadastro-form").addEventListener("submit",(e)=>{
+      e.preventDefault();
+      const [name,email,pass] = e.target.querySelectorAll("input");
+      const r = Account.register(name.value, email.value, pass.value);
+      if(r.ok){ toast("Conta criada com sucesso!","success"); renderAccount(); } else { toast(r.error); }
+    });
+  }
+
+  function statusIndex(status){ return ORDER_STAGES.indexOf(status); }
+
+  function renderLoggedIn(user){
+    const orders = Orders.mine();
+    area.innerHTML = `
+      <div class="flex-between" style="margin-bottom:22px;">
+        <div><span class="eyebrow">Olá, ${user.name.split(" ")[0]}</span><h1 style="color:var(--roxo);font-family:var(--font-display);font-size:1.9rem;">Minha conta</h1></div>
+        <button class="btn btn-outline btn-sm" id="logout-btn">Sair</button>
+      </div>
+      <div class="account-tabs">
+        <button class="active" data-tab="pedidos">Meus Pedidos</button>
+        <button data-tab="dados">Meus Dados</button>
+      </div>
+      <div id="tab-pedidos">
+        ${orders.length ? orders.map(o=>`
+          <div class="order-card">
+            <div class="order-head">
+              <div><strong>Pedido ${o.id}</strong> <span style="color:var(--ink-soft);font-size:.8rem;">— ${formatDate(o.date)}</span></div>
+              <span class="order-status ${o.status}">${ORDER_LABELS[o.status]}</span>
+            </div>
+            <div style="font-size:.86rem;color:var(--ink-soft);">${o.items.map(i=>`${i.qty}x ${i.name}`).join(", ")}</div>
+            <div class="progress-track">${ORDER_STAGES.map((s,i)=>`<span class="${i<=statusIndex(o.status)?'done':''}"></span>`).join("")}</div>
+          </div>`).join("") : `<div class="empty-state"><div class="ic">${Icons.gift||Icons.star}</div><h3>Nenhum pedido ainda</h3><p>Seus pedidos aparecerão aqui depois do checkout.</p><a class="btn" href="produtos.html">Ver Produtos</a></div>`}
+      </div>
+      <div id="tab-dados" class="hidden">
+        <div class="card-panel">
+          <div class="field"><label>Nome</label><input type="text" value="${user.name}" disabled></div>
+          <div class="field"><label>E-mail</label><input type="email" value="${user.email}" disabled></div>
+          <p style="font-size:.8rem;color:var(--ink-soft);">Para alterar seus dados, entre em contato pelo WhatsApp.</p>
+        </div>
+      </div>
+    `;
+    document.getElementById("logout-btn").addEventListener("click", ()=>{ Account.logout(); toast("Você saiu da sua conta."); renderAccount(); });
+    document.querySelectorAll(".account-tabs button").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        document.querySelectorAll(".account-tabs button").forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById("tab-pedidos").classList.toggle("hidden", btn.dataset.tab!=="pedidos");
+        document.getElementById("tab-dados").classList.toggle("hidden", btn.dataset.tab!=="dados");
+      });
+    });
+  }
+
+  function renderAccount(){
+    const user = Account.currentUser();
+    user ? renderLoggedIn(user) : renderLoggedOut();
+  }
+  renderAccount();
+</script>
+</body>
+</html>

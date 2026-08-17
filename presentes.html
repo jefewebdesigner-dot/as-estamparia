@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Presentes Personalizados — AS Estamparia</title>
+<meta name="description" content="Presentes personalizados para aniversário, Dia das Mães, Dia dos Pais, Natal, casamento, formatura e mais. Transformamos fotos e histórias em presentes únicos.">
+<link rel="icon" href="assets/logo-as-estamparia.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="presentes">
+
+<div class="announce">✂️ Personalização sob medida — conte sua ideia e receba um orçamento pelo <strong>WhatsApp</strong></div>
+<header class="site-header">
+  <div class="header-row">
+    <a href="index.html" class="brand"><img src="assets/logo-as-estamparia.png" alt="AS Estamparia"><span class="brand-word">AS Estamparia<small>Personalizados</small></span></a>
+    <nav class="main-nav" data-main-nav>
+      <a href="index.html" data-nav="home">Início</a>
+      <a href="produtos.html" data-nav="produtos">Produtos</a>
+      <a href="presentes.html" data-nav="presentes">Presentes</a>
+      <a href="empresas.html" data-nav="empresas">Para Empresas</a>
+      <a href="personalize.html" data-nav="personalize">Personalize</a>
+      <a href="sobre.html" data-nav="sobre">Sobre</a>
+      <a href="contato.html" data-nav="contato">Contato</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" data-search-toggle aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
+      <a class="icon-btn" href="conta.html" aria-label="Minha conta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.6-4 5-6 8-6s6.4 2 8 6"/></svg></a>
+      <a class="icon-btn" href="favoritos.html" aria-label="Favoritos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg><span class="count" data-fav-count style="display:none">0</span></a>
+      <a class="icon-btn" href="carrinho.html" aria-label="Carrinho"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.5 2.5h3l2.7 12.9a2 2 0 0 0 2 1.6h8.3a2 2 0 0 0 2-1.6l1.3-7.4H6.2"/></svg><span class="count" data-cart-count style="display:none">0</span></a>
+      <a class="btn btn-sm header-cta" href="produtos.html">Fazer Pedido</a>
+      <button class="hamburger" data-hamburger aria-label="Abrir menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" width="22" height="22"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    </div>
+    <div class="nav-backdrop" data-nav-backdrop></div>
+  </div>
+  <div class="search-panel" data-search-panel><form data-search-form><input type="text" name="busca" placeholder="Buscar camisetas, canecas, quadros..."><button class="btn btn-sm" type="submit">Buscar</button></form></div>
+</header>
+
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow">Presentes personalizados</span>
+    <h1>Não sabe o que dar de presente?</h1>
+    <p>Transformamos fotos, nomes, frases e histórias em presentes únicos — para cada pessoa e cada ocasião especial.</p>
+  </div>
+</section>
+
+<section class="page-body">
+  <div class="container">
+    <nav class="breadcrumb"><a href="index.html">Início</a><span class="sep">/</span><span>Presentes</span></nav>
+
+    <div class="section-head center">
+      <span class="eyebrow" style="justify-content:center">Escolha a ocasião</span>
+      <h2>Presentes para cada momento</h2>
+      <p>Selecione a ocasião para ver ideias de presentes personalizados.</p>
+    </div>
+    <div class="occasion-grid" id="occasions-grid" style="margin-bottom:60px;"></div>
+
+    <div class="flex-between" style="margin-bottom:30px;">
+      <h2 style="font-size:1.5rem;" id="occasion-title">Ideias de presentes</h2>
+      <button class="filter-chip" id="clear-occasion" style="display:none;">Ver todas as ocasiões ✕</button>
+    </div>
+    <div class="grid-products" id="gift-grid"></div>
+
+    <div class="cta-final" style="margin-top:70px;">
+      <div class="texture-dots"></div>
+      <div style="position:relative;z-index:2;">
+        <h2>Ainda não decidiu?</h2>
+        <p>Conta pra gente quem é a pessoa e a ocasião — a gente te ajuda a encontrar o presente ideal.</p>
+        <a href="#" class="btn btn-turquesa btn-lg" data-wa-btn data-wa-msg="Olá! Quero ajuda para encontrar um presente personalizado.">Encontrar Meu Presente</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div class="footer-brand"><img src="assets/logo-as-estamparia.png" alt="AS Estamparia"></div>
+        <p class="footer-slogan">"Sua ideia. Seu estilo. Do seu jeito."</p>
+        <p>Produtos personalizados para transformar momentos, ideias e marcas em algo único.</p>
+        <div class="footer-social">
+          <a href="#" data-instagram-link aria-label="Instagram"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>
+          <a href="#" data-wa-btn aria-label="WhatsApp"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.1.2-.3.3-.4.1-.2 0-.4 0-.5S9.4 7.8 9.2 7.3c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.6 1.1 2.8c.1.2 1.8 2.8 4.5 3.9.6.3 1.1.4 1.5.6.6.2 1.2.2 1.6.1.5-.1 1.7-.7 1.9-1.3.2-.6.2-1.1.2-1.3-.1-.1-.3-.2-.6-.3Z"/><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Z"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col"><h5>Navegação</h5><ul>
+        <li><a href="index.html">Início</a></li><li><a href="produtos.html">Produtos</a></li>
+        <li><a href="presentes.html">Presentes</a></li><li><a href="empresas.html">Para Empresas</a></li>
+        <li><a href="personalize.html">Personalize</a></li><li><a href="sobre.html">Sobre</a></li>
+      </ul></div>
+      <div class="footer-col"><h5>Minha Conta</h5><ul>
+        <li><a href="conta.html">Entrar / Cadastrar</a></li><li><a href="favoritos.html">Favoritos</a></li>
+        <li><a href="carrinho.html">Carrinho</a></li><li><a href="galeria.html">Galeria</a></li>
+        <li><a href="contato.html">Perguntas frequentes</a></li>
+      </ul></div>
+      <div class="footer-col"><h5>Contato</h5><ul>
+        <li>📍 <span data-info="address">[Endereço a definir]</span></li>
+        <li>💬 <span data-info="whatsapp">[WhatsApp a definir]</span></li>
+        <li>✉️ <span data-info="email">[E-mail a definir]</span></li>
+        <li>🕒 <span data-info="hours">[Horário a definir]</span></li>
+      </ul></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> AS Estamparia. Todos os direitos reservados.</span>
+      <span class="placeholder-note">Site em fase de configuração — dados de contato a definir.</span>
+    </div>
+  </div>
+</footer>
+<div id="toast-stack"></div>
+<button id="back-top" aria-label="Voltar ao topo">↑</button>
+
+<script src="js/config.js"></script>
+<script src="js/products.js"></script>
+<script src="js/store.js"></script>
+<script src="js/ui.js"></script>
+<script>
+  let activeOccasion = new URLSearchParams(location.search).get("ocasiao") || "";
+
+  function renderOccasions(){
+    document.getElementById("occasions-grid").innerHTML = window.AS_OCCASIONS.map(o=>`
+      <button class="occasion-chip" data-occ="${o.slug}" style="${activeOccasion===o.slug?'background:var(--roxo);color:var(--branco);':''}">
+        <span class="ic">${occasionIconSVG(o.icon)}</span><span>${o.name}</span>
+      </button>`).join("");
+    document.querySelectorAll("[data-occ]").forEach(btn=>btn.addEventListener("click", ()=>{
+      activeOccasion = btn.getAttribute("data-occ"); renderOccasions(); renderGiftGrid();
+    }));
+  }
+  function renderGiftGrid(){
+    const titleEl = document.getElementById("occasion-title");
+    const clearBtn = document.getElementById("clear-occasion");
+    let list = window.AS_PRODUCTS;
+    if(activeOccasion){
+      const occ = window.AS_OCCASIONS.find(o=>o.slug===activeOccasion);
+      titleEl.textContent = "Ideias para " + (occ?occ.name:"essa ocasião");
+      clearBtn.style.display = "inline-flex";
+      list = list.filter(p => (p.occasions||[]).includes(activeOccasion));
+    } else {
+      titleEl.textContent = "Ideias de presentes";
+      clearBtn.style.display = "none";
+      list = list.filter(p => (p.occasions||[]).length);
+    }
+    renderGrid(document.getElementById("gift-grid"), list, productCardHTML);
+    wireFavButtons();
+  }
+  document.getElementById("clear-occasion").addEventListener("click", ()=>{ activeOccasion=""; renderOccasions(); renderGiftGrid(); });
+
+  renderOccasions();
+  renderGiftGrid();
+</script>
+</body>
+</html>

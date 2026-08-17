@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /carrinho.html
+Disallow: /checkout.html
+Disallow: /favoritos.html
+Disallow: /conta.html
+
+Sitemap: https://www.SEUDOMINIO.com.br/sitemap.xml
