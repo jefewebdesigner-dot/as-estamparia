@@ -10,74 +10,525 @@
 </head>
 <body data-page="admin">
 
+<!-- ===================== TELA DE LOGIN ===================== -->
+<div id="admin-login-overlay" class="admin-login-overlay" style="display:none;">
+  <div class="admin-login-card">
+    <div class="brand-icon">
+      <img src="../assets/logo-as-estamparia.png" alt="AS Estamparia" style="height:36px;">
+    </div>
+    <h2>Painel do Lojista</h2>
+    <p>Digite a senha de acesso para gerenciar os produtos e configurações do site.</p>
+    <div id="login-error" class="login-error"></div>
+    <form id="admin-login-form">
+      <div class="field">
+        <label for="admin-pass-input">Senha de Administrador</label>
+        <input type="password" id="admin-pass-input" placeholder="Digite sua senha..." autocomplete="current-password" required autofocus>
+      </div>
+      <button class="btn btn-block" type="submit" style="margin-top:10px;">Entrar no Painel</button>
+    </form>
+    <div style="margin-top:20px;font-size:.78rem;color:var(--ink-soft);">
+      <span>Senha inicial padrão: <code>admin123</code></span>
+      <br><br>
+      <a href="../index.html" class="link-arrow" style="font-size:.82rem;">← Voltar à página inicial</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== BARRA SUPERIOR MOBILE ===================== -->
+<header class="admin-topbar">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <img src="../assets/logo-as-estamparia.png" alt="AS Estamparia" style="height:28px;">
+    <span style="font-weight:700;font-size:.9rem;">AS Admin</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <a href="../index.html" target="_blank" class="mini-btn" style="color:var(--branco);border-color:rgba(255,255,255,.3);">Ver Loja ↗</a>
+    <button id="mobile-logout-btn" class="mini-btn" style="background:#d32f2f;color:#fff;border:none;">Sair</button>
+  </div>
+</header>
+
 <div class="admin-shell">
+  <!-- ===================== SIDEBAR ===================== -->
   <aside class="admin-side">
     <div class="brand">
       <img src="../assets/logo-as-estamparia.png" alt="AS Estamparia" style="height:38px;">
-      <span class="brand-word">AS Estamparia<small>Painel Admin</small></span>
+      <span class="brand-word">AS Estamparia<small>Painel de Gestão</small></span>
     </div>
+    
     <nav class="admin-nav" id="admin-nav">
-      <button data-panel="dashboard" class="active">Visão geral</button>
-      <button data-panel="pedidos">Pedidos</button>
-      <button data-panel="produtos">Produtos</button>
-      <button data-panel="cupons">Cupons</button>
-      <button data-panel="config">Configurações</button>
+      <button data-panel="dashboard" class="active">📊 Visão geral</button>
+      <button data-panel="produtos">📦 Produtos</button>
+      <button data-panel="pedidos">📑 Pedidos</button>
+      <button data-panel="galeria">🖼️ Galeria</button>
+      <button data-panel="cupons">🏷️ Cupons</button>
+      <button data-panel="config">⚙️ Configurações</button>
+      <button data-panel="backup">💾 Backup & Dados</button>
     </nav>
-    <a href="../index.html" class="link-arrow" style="color:var(--turquesa-claro);margin-top:36px;display:inline-flex;">← Voltar ao site</a>
+
+    <div style="margin-top:auto;padding-top:24px;border-top:1px solid rgba(255,255,255,.15);display:flex;flex-direction:column;gap:10px;">
+      <a href="../index.html" target="_blank" class="link-arrow" style="color:var(--turquesa-claro);font-size:.85rem;">↗ Ver site ao vivo</a>
+      <button id="admin-logout-btn" class="mini-btn" style="background:rgba(255,255,255,.1);color:var(--branco);border-color:rgba(255,255,255,.2);text-align:center;width:100%;cursor:pointer;">
+        🔒 Sair da sessão
+      </button>
+    </div>
   </aside>
 
+  <!-- ===================== CONTEÚDO PRINCIPAL ===================== -->
   <main class="admin-main">
-    <div class="notice-box" style="margin-bottom:24px;background:#FFF3D6;border-color:#E9CE8A;">
-      <p><strong>Protótipo front-end:</strong> este painel lê e grava dados no navegador (localStorage). Antes de publicar, conecte um backend com login seguro, banco de dados e controle de acesso por usuário.</p>
-    </div>
-
-    <!-- ===================== DASHBOARD ===================== -->
+    
+    <!-- ===================== PAINEL 1: DASHBOARD ===================== -->
     <section class="admin-panel active" id="panel-dashboard">
-      <div class="admin-head"><h1>Visão geral</h1></div>
+      <div class="admin-head">
+        <div>
+          <h1>Visão geral</h1>
+          <span style="font-size:.85rem;color:var(--ink-soft);">Resumo do catálogo e atividades da AS Estamparia</span>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-sm" onclick="openProductModal()">+ Novo Produto</button>
+        </div>
+      </div>
+
       <div class="kpi-row" id="kpi-row"></div>
-      <div class="card-panel">
-        <h3 style="color:var(--roxo);margin-bottom:14px;">Últimos pedidos</h3>
-        <div class="table-wrap"><table class="data-table" id="dash-orders-table"><thead><tr><th>Nº</th><th>Cliente</th><th>Itens</th><th>Status</th><th>Data</th></tr></thead><tbody></tbody></table></div>
+
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:24px;">
+        <div class="card-panel">
+          <div class="flex-between" style="margin-bottom:14px;">
+            <h3 style="color:var(--roxo);margin:0;">Últimos Pedidos Recebidos</h3>
+            <button class="mini-btn" onclick="switchTab('pedidos')">Ver todos</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table" id="dash-orders-table">
+              <thead>
+                <tr>
+                  <th>Nº</th><th>Cliente</th><th>Itens</th><th>Status</th><th>Data</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card-panel" style="display:flex;flex-direction:column;justify-content:space-between;">
+          <div>
+            <h3 style="color:var(--roxo);margin-bottom:12px;">Ações Rápidas</h3>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <button class="btn btn-sm btn-block" style="text-align:left;" onclick="openProductModal()">➕ Cadastrar Novo Produto</button>
+              <button class="mini-btn" style="padding:10px;text-align:left;" onclick="switchTab('config')">⚙️ Alterar WhatsApp e Contatos</button>
+              <button class="mini-btn" style="padding:10px;text-align:left;" onclick="switchTab('galeria')">🖼️ Adicionar Foto na Galeria</button>
+              <button class="mini-btn" style="padding:10px;text-align:left;" onclick="switchTab('backup')">💾 Baixar Backup do Catálogo</button>
+            </div>
+          </div>
+          <div style="margin-top:16px;padding:12px;background:var(--algodao);border:1.5px solid var(--line);border-radius:10px;font-size:.78rem;color:var(--ink-soft);">
+            💡 <b>Dica:</b> Todas as alterações feitas neste painel são salvas e refletidas instantaneamente em todo o site!
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- ===================== PEDIDOS ===================== -->
-    <section class="admin-panel" id="panel-pedidos">
-      <div class="admin-head"><h1>Pedidos</h1></div>
-      <div class="table-wrap"><table class="data-table" id="orders-table"><thead><tr><th>Nº</th><th>Cliente</th><th>WhatsApp</th><th>Itens</th><th>Data</th><th>Status</th></tr></thead><tbody></tbody></table></div>
-    </section>
-
-    <!-- ===================== PRODUTOS ===================== -->
+    <!-- ===================== PAINEL 2: PRODUTOS ===================== -->
     <section class="admin-panel" id="panel-produtos">
       <div class="admin-head">
-        <h1>Produtos</h1>
-        <span style="font-size:.8rem;color:var(--ink-soft);max-width:360px;">Catálogo definido em <code>js/products.js</code>. Use os botões abaixo para destacar/ocultar na vitrine (salvo neste navegador).</span>
-      </div>
-      <div class="table-wrap"><table class="data-table" id="products-table"><thead><tr><th></th><th>Produto</th><th>Categoria</th><th>Preço</th><th>Destaque</th></tr></thead><tbody></tbody></table></div>
-    </section>
-
-    <!-- ===================== CUPONS ===================== -->
-    <section class="admin-panel" id="panel-cupons">
-      <div class="admin-head"><h1>Cupons de desconto</h1></div>
-      <form class="card-panel" id="coupon-form" style="max-width:520px;margin-bottom:24px;">
-        <div class="field-row">
-          <div class="field"><label>Código</label><input type="text" id="new-coupon-code" placeholder="EX: BEMVINDO10" required></div>
-          <div class="field"><label>Desconto (%)</label><input type="number" id="new-coupon-percent" min="1" max="90" required></div>
+        <div>
+          <h1>Catálogo de Produtos</h1>
+          <span style="font-size:.85rem;color:var(--ink-soft);">Gerencie os produtos, fotos, categorias, preços e destaques da loja</span>
         </div>
-        <button class="btn" type="submit">Adicionar cupom</button>
-      </form>
-      <div class="table-wrap"><table class="data-table" id="coupons-table"><thead><tr><th>Código</th><th>Desconto</th><th>Status</th><th></th></tr></thead><tbody></tbody></table></div>
-    </section>
+        <button class="btn" onclick="openProductModal()">+ Novo Produto</button>
+      </div>
 
-    <!-- ===================== CONFIG ===================== -->
-    <section class="admin-panel" id="panel-config">
-      <div class="admin-head"><h1>Configurações de contato</h1></div>
-      <div class="card-panel" style="max-width:600px;">
-        <p style="color:var(--ink-soft);font-size:.9rem;margin-bottom:16px;">Estes dados vêm do arquivo <code>js/config.js</code>. Edite o arquivo diretamente para atualizar WhatsApp, e-mail, endereço, horários e formas de pagamento em todo o site.</p>
-        <table class="data-table"><tbody id="config-preview"></tbody></table>
+      <div class="admin-toolbar">
+        <div class="admin-toolbar-left">
+          <input type="text" id="product-search" class="admin-search-input" placeholder="🔍 Buscar por nome ou categoria...">
+          <select id="product-cat-filter" class="admin-select">
+            <option value="todos">Todas as categorias</option>
+          </select>
+          <select id="product-status-filter" class="admin-select">
+            <option value="todos">Todos os status</option>
+            <option value="ativos">Apenas Ativos</option>
+            <option value="ocultos">Apenas Ocultos</option>
+            <option value="destaques">Apenas Destaques</option>
+          </select>
+        </div>
+        <div style="font-size:.84rem;color:var(--ink-soft);font-weight:600;" id="product-count-lbl">
+          0 produtos
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table" id="products-table">
+          <thead>
+            <tr>
+              <th style="width:60px;">Foto</th>
+              <th>Produto</th>
+              <th>Categoria</th>
+              <th>Preço</th>
+              <th>Status</th>
+              <th style="width:230px;text-align:right;">Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
     </section>
+
+    <!-- ===================== PAINEL 3: PEDIDOS ===================== -->
+    <section class="admin-panel" id="panel-pedidos">
+      <div class="admin-head">
+        <div>
+          <h1>Pedidos e Orçamentos</h1>
+          <span style="font-size:.85rem;color:var(--ink-soft);">Acompanhe os pedidos gerados pelos clientes pelo carrinho e checkout</span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table" id="orders-table">
+          <thead>
+            <tr>
+              <th>Nº</th><th>Cliente</th><th>WhatsApp</th><th>Itens</th><th>Data</th><th>Status</th><th style="text-align:right;">Ação</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== PAINEL 4: GALERIA ===================== -->
+    <section class="admin-panel" id="panel-galeria">
+      <div class="admin-head">
+        <div>
+          <h1>Galeria de Trabalhos Reais</h1>
+          <span style="font-size:.85rem;color:var(--ink-soft);">Fotos de portfólio exibidas na página de Galeria e na Página Inicial</span>
+        </div>
+        <button class="btn" onclick="openGalleryModal()">+ Adicionar Foto</button>
+      </div>
+
+      <div class="admin-gallery-grid" id="admin-gallery-grid"></div>
+    </section>
+
+    <!-- ===================== PAINEL 5: CUPONS ===================== -->
+    <section class="admin-panel" id="panel-cupons">
+      <div class="admin-head">
+        <div>
+          <h1>Cupons de Desconto</h1>
+          <span style="font-size:.85rem;color:var(--ink-soft);">Crie cupons promocionais para seus clientes usarem no carrinho</span>
+        </div>
+      </div>
+
+      <form class="card-panel" id="coupon-form" style="max-width:560px;margin-bottom:24px;">
+        <h3 style="font-size:1.1rem;color:var(--roxo);margin-bottom:14px;">Cadastrar Novo Cupom</h3>
+        <div class="admin-form-grid">
+          <div class="admin-field">
+            <label>Código do Cupom</label>
+            <input type="text" id="new-coupon-code" placeholder="EX: PROMO10" required>
+          </div>
+          <div class="admin-field">
+            <label>Desconto (%)</label>
+            <input type="number" id="new-coupon-percent" min="1" max="90" placeholder="EX: 10" required>
+          </div>
+        </div>
+        <button class="btn" type="submit">Adicionar Cupom</button>
+      </form>
+
+      <div class="table-wrap" style="max-width:720px;">
+        <table class="data-table" id="coupons-table">
+          <thead>
+            <tr><th>Código</th><th>Desconto</th><th>Status</th><th style="text-align:right;">Ação</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== PAINEL 6: CONFIGURAÇÕES ===================== -->
+    <section class="admin-panel" id="panel-config">
+      <div class="admin-head">
+        <div>
+          <h1>Configurações da Loja</h1>
+          <span style="font-size:.85rem;color:var(--ink-soft);">Atualize os dados de contato, redes sociais, horários e senha do painel</span>
+        </div>
+      </div>
+
+      <form id="store-config-form" class="card-panel" style="max-width:860px;margin-bottom:30px;">
+        <h3 style="font-size:1.15rem;color:var(--roxo);margin-bottom:16px;border-bottom:1.5px solid var(--line);padding-bottom:8px;">
+          Dados de Contato e Atendimento
+        </h3>
+        
+        <div class="admin-form-grid">
+          <div class="admin-field">
+            <label>Nome da Marca</label>
+            <input type="text" id="cfg-brand" required>
+          </div>
+
+          <div class="admin-field">
+            <label>WhatsApp (com DDD, apenas dígitos)</label>
+            <input type="text" id="cfg-whatsapp" placeholder="Ex: 5511999998888">
+            <span class="help-text" id="cfg-wa-preview">Link: [digite o número acima]</span>
+          </div>
+
+          <div class="admin-field">
+            <label>E-mail de Atendimento</label>
+            <input type="email" id="cfg-email" placeholder="contato@asestamparia.com.br">
+          </div>
+
+          <div class="admin-field">
+            <label>Instagram (usuário)</label>
+            <input type="text" id="cfg-instagram" placeholder="@asestamparia">
+          </div>
+
+          <div class="admin-field full">
+            <label>Endereço Físico</label>
+            <input type="text" id="cfg-address" placeholder="Rua Exemplo, 123 — Bairro, Cidade/UF">
+          </div>
+
+          <div class="admin-field">
+            <label>Horário de Funcionamento</label>
+            <input type="text" id="cfg-hours" placeholder="Seg a Sex, 9h às 18h">
+          </div>
+
+          <div class="admin-field">
+            <label>Formas de Pagamento</label>
+            <input type="text" id="cfg-payments" placeholder="Pix, Cartão de Crédito e Dinheiro">
+          </div>
+
+          <div class="admin-field full">
+            <label>Informações de Entrega / Retirada</label>
+            <input type="text" id="cfg-delivery" placeholder="Retirada no local e envio pelos Correios para todo o Brasil">
+          </div>
+
+          <div class="admin-field full">
+            <label>Slogan Principal</label>
+            <input type="text" id="cfg-slogan">
+          </div>
+
+          <div class="admin-field full">
+            <label>Mensagem Padrão ao Abrir WhatsApp</label>
+            <textarea id="cfg-wa-msg" rows="2"></textarea>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;">
+          <button class="btn" type="submit">💾 Salvar Configurações da Loja</button>
+        </div>
+      </form>
+
+      <!-- Alteração de Senha -->
+      <form id="admin-password-form" class="card-panel" style="max-width:860px;">
+        <h3 style="font-size:1.15rem;color:var(--roxo);margin-bottom:16px;border-bottom:1.5px solid var(--line);padding-bottom:8px;">
+          Segurança de Acesso ao Painel
+        </h3>
+        <p style="font-size:.85rem;color:var(--ink-soft);margin-bottom:16px;">
+          Altere a senha mestra usada para fazer login neste painel administrativo.
+        </p>
+        <div class="admin-form-grid">
+          <div class="admin-field">
+            <label>Senha Atual</label>
+            <input type="password" id="pass-current" required>
+          </div>
+          <div class="admin-field">
+            <label>Nova Senha (mínimo 4 dígitos)</label>
+            <input type="password" id="pass-new" required>
+          </div>
+        </div>
+        <button class="btn btn-sm" type="submit" style="margin-top:10px;">Atualizar Senha</button>
+      </form>
+    </section>
+
+    <!-- ===================== PAINEL 7: BACKUP & DADOS ===================== -->
+    <section class="admin-panel" id="panel-backup">
+      <div class="admin-head">
+        <div>
+          <h1>Backup e Ferramentas de Dados</h1>
+          <span style="font-size:.85rem;color:var(--ink-soft);">Exporte, restaure ou baixe cópias de segurança do catálogo e configurações</span>
+        </div>
+      </div>
+
+      <div class="admin-tools-grid">
+        <div class="admin-tool-card">
+          <div>
+            <h3>📥 Backup Geral (JSON)</h3>
+            <p>Baixe um arquivo de backup completo contendo todos os produtos cadastrados, fotos, configurações, cupons e pedidos.</p>
+          </div>
+          <button class="btn btn-sm btn-block" onclick="downloadBackupJSON()">Baixar Backup (.json)</button>
+        </div>
+
+        <div class="admin-tool-card">
+          <div>
+            <h3>📤 Restaurar Backup</h3>
+            <p>Restaure todos os produtos e configurações a partir de um arquivo de backup (.json) previamente salvo.</p>
+          </div>
+          <div>
+            <input type="file" id="backup-file-input" accept=".json" style="display:none;" onchange="handleRestoreBackup(this)">
+            <button class="btn btn-sm btn-block" onclick="document.getElementById('backup-file-input').click()">Selecionar Arquivo JSON</button>
+          </div>
+        </div>
+
+        <div class="admin-tool-card">
+          <div>
+            <h3>📄 Exportar Código JS</h3>
+            <p>Gere os arquivos físicos <code>products.js</code> e <code>config.js</code> atualizados para salvar diretamente na pasta do projeto.</p>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="mini-btn" style="flex:1;" onclick="downloadProductsJS()">products.js</button>
+            <button class="mini-btn" style="flex:1;" onclick="downloadConfigJS()">config.js</button>
+          </div>
+        </div>
+
+        <div class="admin-tool-card" style="border-color:#E06D6D;">
+          <div>
+            <h3 style="color:#A82020;">🔄 Restaurar Catálogo Original</h3>
+            <p>Limpa todas as edições customizadas e restaura os 14 produtos e configurações padrão originais de fábrica.</p>
+          </div>
+          <button class="mini-btn" style="background:#FFEBEB;color:#A82020;border-color:#E06D6D;" onclick="handleResetFactory()">Restaurar de Fábrica</button>
+        </div>
+      </div>
+    </section>
+
   </main>
+</div>
+
+<!-- ===================== MODAL: NOVO / EDITAR PRODUTO ===================== -->
+<div id="product-modal" class="admin-modal-backdrop">
+  <div class="admin-modal">
+    <div class="admin-modal-head">
+      <h2 id="modal-product-title">Cadastrar Novo Produto</h2>
+      <button type="button" class="admin-modal-close" onclick="closeProductModal()">✕</button>
+    </div>
+    <form id="product-form" class="admin-modal-body">
+      <input type="hidden" id="modal-prod-id">
+
+      <!-- Upload de Foto -->
+      <div class="admin-field">
+        <label>Foto do Produto</label>
+        <div class="image-dropzone" id="prod-dropzone">
+          <input type="file" id="prod-file-input" accept="image/*">
+          <div class="dropzone-prompt" id="dropzone-prompt">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+            <div>
+              <b>Clique para escolher</b> ou arraste uma foto aqui
+              <div style="font-size:.78rem;color:var(--ink-soft);margin-top:2px;">Suporta fotos da câmera, JPG, PNG e WebP (otimização automática)</div>
+            </div>
+          </div>
+          <div class="image-preview-wrap" id="dropzone-preview" style="display:none;">
+            <img id="preview-img" src="" alt="Prévia">
+            <div class="image-preview-info">
+              <b>Foto selecionada e otimizada</b>
+              <span id="preview-filename">imagem.webp</span>
+            </div>
+            <button type="button" class="mini-btn" style="background:#FFEBEB;color:#A82020;border-color:#E06D6D;" onclick="removeProductImage(event)">Remover</button>
+          </div>
+        </div>
+        <input type="hidden" id="modal-prod-image">
+        
+        <div style="margin-top:8px;">
+          <small style="color:var(--ink-soft);cursor:pointer;text-decoration:underline;" onclick="toggleCustomImageUrl()">Ou use um caminho/URL de imagem existente</small>
+          <div id="custom-image-url-wrap" style="display:none;margin-top:6px;">
+            <input type="text" id="modal-prod-image-url" placeholder="Ex: assets/caneca-papai.webp">
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-form-grid">
+        <div class="admin-field full">
+          <label>Nome do Produto *</label>
+          <input type="text" id="modal-prod-name" placeholder="Ex: Caneca com Foto de Família" required>
+        </div>
+
+        <div class="admin-field">
+          <label>Categoria *</label>
+          <select id="modal-prod-cat" required></select>
+        </div>
+
+        <div class="admin-field">
+          <label>Preço</label>
+          <div style="display:flex;gap:8px;">
+            <select id="modal-prod-price-type" style="width:140px;">
+              <option value="consulta">Sob consulta</option>
+              <option value="valor">Preço fixo (R$)</option>
+            </select>
+            <input type="number" id="modal-prod-price-val" step="0.01" min="0" placeholder="Ex: 49.90" style="display:none;flex:1;">
+          </div>
+        </div>
+
+        <div class="admin-field full">
+          <label>Descrição Curta (chamada rápida)</label>
+          <input type="text" id="modal-prod-short" placeholder="Ex: Caneca de cerâmica 325ml com estampa durável em alta definição.">
+        </div>
+
+        <div class="admin-field full">
+          <label>Descrição Completa</label>
+          <textarea id="modal-prod-desc" rows="3" placeholder="Detalhes de material, processo de personalização, malha, cuidados, etc."></textarea>
+        </div>
+
+        <div class="admin-field full">
+          <label>Tags / Destaques do Produto (separadas por vírgula)</label>
+          <input type="text" id="modal-prod-badges" placeholder="Ex: Personalizável, Retrato, Pet, Exclusivo">
+        </div>
+      </div>
+
+      <!-- Opções adicionais -->
+      <div style="margin-top:14px;padding:16px;background:var(--algodao);border:1.5px solid var(--line);border-radius:12px;">
+        <label style="font-weight:700;font-size:.82rem;text-transform:uppercase;color:var(--ink);display:block;margin-bottom:10px;">Opções de Exibição</label>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:10px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:.86rem;cursor:pointer;">
+            <input type="checkbox" id="modal-prod-featured"> ★ Destacar na Home
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:.86rem;cursor:pointer;">
+            <input type="checkbox" id="modal-prod-personalizable" checked> 🎨 Permite Personalização
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:.86rem;cursor:pointer;">
+            <input type="checkbox" id="modal-prod-biz"> 🏢 Exibir em Empresas
+          </label>
+        </div>
+
+        <div style="margin-top:14px;">
+          <label style="font-weight:700;font-size:.78rem;text-transform:uppercase;color:var(--ink);display:block;margin-bottom:6px;">Ocasiões de Presente</label>
+          <div class="chip-checkbox-group" id="modal-occasions-group"></div>
+        </div>
+      </div>
+    </form>
+    <div class="admin-modal-foot">
+      <button type="button" class="mini-btn" onclick="closeProductModal()">Cancelar</button>
+      <button type="button" class="btn" onclick="saveProductModal()">Salvar Produto</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL: ADICIONAR FOTO NA GALERIA ===================== -->
+<div id="gallery-modal" class="admin-modal-backdrop">
+  <div class="admin-modal" style="max-width:540px;">
+    <div class="admin-modal-head">
+      <h2>Adicionar Foto à Galeria</h2>
+      <button type="button" class="admin-modal-close" onclick="closeGalleryModal()">✕</button>
+    </div>
+    <form id="gallery-form" class="admin-modal-body">
+      <div class="admin-field">
+        <label>Foto do Trabalho</label>
+        <div class="image-dropzone" id="gal-dropzone">
+          <input type="file" id="gal-file-input" accept="image/*">
+          <div class="dropzone-prompt" id="gal-dropzone-prompt">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+            <div><b>Clique para escolher</b> ou arraste a foto aqui</div>
+          </div>
+          <div class="image-preview-wrap" id="gal-dropzone-preview" style="display:none;">
+            <img id="gal-preview-img" src="" alt="Prévia">
+            <div class="image-preview-info">
+              <b>Foto selecionada</b>
+              <span id="gal-preview-filename">foto.webp</span>
+            </div>
+            <button type="button" class="mini-btn" style="background:#FFEBEB;color:#A82020;" onclick="removeGalleryImage(event)">Remover</button>
+          </div>
+        </div>
+        <input type="hidden" id="gal-image-val">
+      </div>
+
+      <div class="admin-field">
+        <label>Legenda / Descrição da Foto</label>
+        <input type="text" id="gal-caption-val" placeholder="Ex: Camiseta personalizada para aniversário em família" required>
+      </div>
+    </form>
+    <div class="admin-modal-foot">
+      <button type="button" class="mini-btn" onclick="closeGalleryModal()">Cancelar</button>
+      <button type="button" class="btn" onclick="saveGalleryModal()">Adicionar à Galeria</button>
+    </div>
+  </div>
 </div>
 
 <div id="toast-stack"></div>
@@ -86,122 +537,703 @@
 <script src="../js/products.js"></script>
 <script src="../js/store.js"></script>
 <script src="../js/ui.js"></script>
+
 <script>
-  document.querySelector(".admin-main .notice-box").insertAdjacentHTML("afterbegin", Icons.shield);
+/* ==========================================================================
+   LÓGICA DO PAINEL ADMINISTRATIVO
+   ========================================================================== */
 
-  document.querySelectorAll("#admin-nav button").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      document.querySelectorAll("#admin-nav button").forEach(b=>b.classList.remove("active"));
-      document.querySelectorAll(".admin-panel").forEach(p=>p.classList.remove("active"));
-      btn.classList.add("active");
-      document.getElementById("panel-"+btn.dataset.panel).classList.add("active");
-    });
+let currentSearchTerm = "";
+let currentCatFilter = "todos";
+let currentStatusFilter = "todos";
+
+// 1. Checagem de Autenticação
+function checkAuth(){
+  const isAuth = AdminAuth.isAuthenticated();
+  const overlay = document.getElementById("admin-login-overlay");
+  if(!isAuth){
+    overlay.style.display = "flex";
+    document.getElementById("admin-pass-input").value = "";
+    document.getElementById("login-error").style.display = "none";
+  } else {
+    overlay.style.display = "none";
+    initAdminData();
+  }
+}
+
+document.getElementById("admin-login-form").addEventListener("submit", (e)=>{
+  e.preventDefault();
+  const pass = document.getElementById("admin-pass-input").value;
+  const res = AdminAuth.login(pass);
+  if(res.ok){
+    toast("Login realizado com sucesso!", "success");
+    checkAuth();
+  } else {
+    const errEl = document.getElementById("login-error");
+    errEl.textContent = res.error;
+    errEl.style.display = "block";
+  }
+});
+
+function handleLogout(){
+  AdminAuth.logout();
+  toast("Sessão encerrada.");
+  checkAuth();
+}
+document.getElementById("admin-logout-btn")?.addEventListener("click", handleLogout);
+document.getElementById("mobile-logout-btn")?.addEventListener("click", handleLogout);
+
+// 2. Navegação entre abas
+function switchTab(panelId){
+  document.querySelectorAll("#admin-nav button").forEach(b=>{
+    b.classList.toggle("active", b.dataset.panel === panelId);
   });
-
-  function renderDashboard(){
-    const orders = Orders.all();
-    const producao = orders.filter(o=>o.status==="producao").length;
-    const coupons = Coupons.all().filter(c=>c.active).length;
-    document.getElementById("kpi-row").innerHTML = `
-      <div class="kpi-card"><div class="num">${orders.length}</div><div class="lbl">Pedidos recebidos</div></div>
-      <div class="kpi-card"><div class="num">${producao}</div><div class="lbl">Em produção</div></div>
-      <div class="kpi-card"><div class="num">${window.AS_PRODUCTS.length}</div><div class="lbl">Produtos no catálogo</div></div>
-      <div class="kpi-card"><div class="num">${coupons}</div><div class="lbl">Cupons ativos</div></div>
-    `;
-    document.querySelector("#dash-orders-table tbody").innerHTML = orders.slice(0,6).map(o=>`
-      <tr><td>${o.id}</td><td>${o.customerName}</td><td>${o.items.length} item(ns)</td><td><span class="order-status ${o.status}">${ORDER_LABELS[o.status]}</span></td><td>${formatDate(o.date)}</td></tr>
-    `).join("") || `<tr><td colspan="5" style="color:var(--ink-soft);">Nenhum pedido registrado ainda.</td></tr>`;
-  }
-
-  function renderOrdersTable(){
-    const orders = Orders.all();
-    document.querySelector("#orders-table tbody").innerHTML = orders.map(o=>`
-      <tr>
-        <td>${o.id}</td><td>${o.customerName}</td><td>${o.phone||"—"}</td>
-        <td>${o.items.map(i=>`${i.qty}x ${i.name}`).join(", ")}</td>
-        <td>${formatDate(o.date)}</td>
-        <td>
-          <select data-order="${o.id}" class="sort-select" style="padding:6px 10px;font-size:.75rem;">
-            ${ORDER_STAGES.map(s=>`<option value="${s}" ${s===o.status?'selected':''}>${ORDER_LABELS[s]}</option>`).join("")}
-          </select>
-        </td>
-      </tr>`).join("") || `<tr><td colspan="6" style="color:var(--ink-soft);">Nenhum pedido registrado ainda.</td></tr>`;
-    document.querySelectorAll("[data-order]").forEach(sel=>{
-      sel.addEventListener("change", ()=>{
-        Orders.updateStatus(sel.dataset.order, sel.value);
-        toast("Status do pedido atualizado.","success");
-        renderDashboard();
-      });
-    });
-  }
-
-  function readOverrides(){ return readLS("as_product_overrides", {}); }
-  function renderProductsTable(){
-    const overrides = readOverrides();
-    document.querySelector("#products-table tbody").innerHTML = window.AS_PRODUCTS.map(p=>{
-      const featured = overrides[p.id]?.featured ?? !!p.featured;
-      const media = p.image ? `<img src="../${p.image}" alt="">` : `<div style="width:44px;height:44px;">${categoryArtSVG(p.icon,44)}</div>`;
-      return `<tr>
-        <td>${media}</td>
-        <td>${p.name}</td>
-        <td>${getCategory(p.category)?.name||""}</td>
-        <td>Sob consulta</td>
-        <td><button class="mini-btn" data-toggle-featured="${p.id}">${featured?"★ Em destaque":"☆ Destacar"}</button></td>
-      </tr>`;
-    }).join("");
-    document.querySelectorAll("[data-toggle-featured]").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const id = btn.dataset.toggleFeatured;
-        const overrides = readOverrides();
-        const current = overrides[id]?.featured ?? !!getProductById(id).featured;
-        overrides[id] = {...(overrides[id]||{}), featured: !current};
-        writeLS("as_product_overrides", overrides);
-        renderProductsTable();
-        toast("Preferência de destaque salva neste navegador.");
-      });
-    });
-  }
-
-  function renderCouponsTable(){
-    const list = Coupons.all();
-    document.querySelector("#coupons-table tbody").innerHTML = list.map(c=>`
-      <tr><td><strong>${c.code}</strong></td><td>${c.percent}%</td><td>${c.active?"Ativo":"Inativo"}</td>
-      <td><button class="mini-btn" data-remove-coupon="${c.code}">Remover</button></td></tr>
-    `).join("") || `<tr><td colspan="4" style="color:var(--ink-soft);">Nenhum cupom cadastrado ainda.</td></tr>`;
-    document.querySelectorAll("[data-remove-coupon]").forEach(btn=>{
-      btn.addEventListener("click", ()=>{ Coupons.remove(btn.dataset.removeCoupon); renderCouponsTable(); renderDashboard(); toast("Cupom removido."); });
-    });
-  }
-  document.getElementById("coupon-form").addEventListener("submit",(e)=>{
-    e.preventDefault();
-    const code = document.getElementById("new-coupon-code").value.trim();
-    const percent = document.getElementById("new-coupon-percent").value;
-    if(!code || !percent) return;
-    Coupons.add(code, percent);
-    e.target.reset();
-    renderCouponsTable(); renderDashboard();
-    toast("Cupom adicionado!","success");
+  document.querySelectorAll(".admin-panel").forEach(p=>{
+    p.classList.toggle("active", p.id === "panel-" + panelId);
   });
+  if(panelId === "produtos") renderProductsTable();
+  if(panelId === "pedidos") renderOrdersTable();
+  if(panelId === "galeria") renderGallery();
+  if(panelId === "cupons") renderCouponsTable();
+  if(panelId === "config") renderConfigForm();
+  if(panelId === "dashboard") renderDashboard();
+}
 
-  function renderConfigPreview(){
-    const c = window.AS_CONFIG;
-    const rows = [
-      ["WhatsApp", c.whatsappNumber || "[a definir]"],
-      ["E-mail", c.email || "[a definir]"],
-      ["Instagram", c.instagram || "[a definir]"],
-      ["Endereço", c.address || "[a definir]"],
-      ["Horário", c.hours || "[a definir]"],
-      ["Pagamento", c.paymentMethods || "[a definir]"],
-      ["Entrega", c.deliveryInfo || "[a definir]"]
-    ];
-    document.getElementById("config-preview").innerHTML = rows.map(([k,v])=>`<tr><td style="font-weight:700;color:var(--roxo);width:140px;">${k}</td><td>${v}</td></tr>`).join("");
-  }
+document.querySelectorAll("#admin-nav button").forEach(btn=>{
+  btn.addEventListener("click", () => switchTab(btn.dataset.panel));
+});
 
+// 3. Inicialização de Dados
+function initAdminData(){
   renderDashboard();
-  renderOrdersTable();
+  initCategoriesSelects();
   renderProductsTable();
+  renderOrdersTable();
+  renderGallery();
   renderCouponsTable();
-  renderConfigPreview();
+  renderConfigForm();
+}
+
+function initCategoriesSelects(){
+  const cats = window.AS_DEFAULT_CATEGORIES || [];
+  const filterSelect = document.getElementById("product-cat-filter");
+  const modalSelect = document.getElementById("modal-prod-cat");
+  
+  filterSelect.innerHTML = `<option value="todos">Todas as categorias</option>` +
+    cats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
+
+  modalSelect.innerHTML = cats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
+
+  // Occasions checkboxes in modal
+  const occasions = window.AS_DEFAULT_OCCASIONS || [];
+  document.getElementById("modal-occasions-group").innerHTML = occasions.map(o => `
+    <label class="chip-checkbox">
+      <input type="checkbox" value="${o.slug}">
+      <span>${o.name}</span>
+    </label>
+  `).join("");
+}
+
+// 4. Renderização do Dashboard
+function renderDashboard(){
+  const products = CatalogStore.getAll(true);
+  const activeProducts = products.filter(p => !p.hidden).length;
+  const featured = products.filter(p => p.featured && !p.hidden).length;
+  const orders = Orders.all();
+  const coupons = Coupons.all().filter(c => c.active).length;
+
+  document.getElementById("kpi-row").innerHTML = `
+    <div class="kpi-card"><div class="num">${activeProducts}</div><div class="lbl">Produtos Ativos</div></div>
+    <div class="kpi-card"><div class="num">${featured}</div><div class="lbl">Em Destaque na Home</div></div>
+    <div class="kpi-card"><div class="num">${orders.length}</div><div class="lbl">Pedidos Recebidos</div></div>
+    <div class="kpi-card"><div class="num">${coupons}</div><div class="lbl">Cupons Ativos</div></div>
+  `;
+
+  document.querySelector("#dash-orders-table tbody").innerHTML = orders.slice(0, 5).map(o => `
+    <tr>
+      <td><b>${o.id}</b></td>
+      <td>${o.customerName}</td>
+      <td>${(o.items||[]).length} item(ns)</td>
+      <td><span class="order-status ${o.status}">${ORDER_LABELS[o.status] || o.status}</span></td>
+      <td>${formatDate(o.date)}</td>
+    </tr>
+  `).join("") || `<tr><td colspan="5" style="color:var(--ink-soft);text-align:center;padding:20px;">Nenhum pedido recebido ainda.</td></tr>`;
+}
+
+// 5. Renderização e Gestão de Produtos
+function renderProductsTable(){
+  const allProducts = CatalogStore.getAll(true);
+  let list = allProducts.slice();
+
+  if(currentCatFilter !== "todos"){
+    list = list.filter(p => p.category === currentCatFilter);
+  }
+  if(currentStatusFilter === "ativos") list = list.filter(p => !p.hidden);
+  if(currentStatusFilter === "ocultos") list = list.filter(p => p.hidden);
+  if(currentStatusFilter === "destaques") list = list.filter(p => p.featured && !p.hidden);
+
+  if(currentSearchTerm){
+    const s = currentSearchTerm.toLowerCase();
+    list = list.filter(p => (p.name + " " + (p.shortDesc||"") + " " + p.category).toLowerCase().includes(s));
+  }
+
+  document.getElementById("product-count-lbl").textContent = `${list.length} produto${list.length===1?'':'s'} exibido${list.length===1?'':'s'}`;
+
+  const tbody = document.querySelector("#products-table tbody");
+  if(!list.length){
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--ink-soft);">Nenhum produto encontrado com os filtros atuais.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(p => {
+    const isHidden = !!p.hidden;
+    const isFeatured = !!p.featured;
+    const cat = getCategory(p.category);
+    const media = p.image
+      ? `<img src="${p.image.startsWith('data:')||p.image.startsWith('http')?p.image:'../'+p.image}" alt="">`
+      : `<div style="width:44px;height:44px;">${categoryArtSVG(p.icon||'gift', 44)}</div>`;
+
+    const priceLabel = (p.price && !isNaN(p.price) && Number(p.price) > 0)
+      ? `R$ ${Number(p.price).toFixed(2).replace('.', ',')}`
+      : `<span style="color:var(--ink-soft);font-size:.82rem;">Sob consulta</span>`;
+
+    return `
+      <tr style="${isHidden?'opacity:.65;background:#fafafa;':''}">
+        <td>${media}</td>
+        <td>
+          <div style="font-weight:700;color:var(--ink);">${p.name}</div>
+          <small style="color:var(--ink-soft);">${p.shortDesc ? p.shortDesc.slice(0, 60)+'...' : ''}</small>
+        </td>
+        <td><span class="badge">${cat ? cat.name : p.category}</span></td>
+        <td><b>${priceLabel}</b></td>
+        <td>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;">
+            ${isHidden ? '<span class="status-pill hidden">Oculto</span>' : '<span class="status-pill active">Ativo</span>'}
+            ${isFeatured ? '<span class="status-pill featured">★ Destaque</span>' : ''}
+          </div>
+        </td>
+        <td style="text-align:right;">
+          <div class="action-btn-group" style="justify-content:flex-end;">
+            <button class="btn-action" onclick="editProduct('${p.id}')" title="Editar">✏️ Editar</button>
+            <button class="btn-action ${isFeatured?'btn-warning':''}" onclick="toggleProductFeatured('${p.id}')" title="Alternar Destaque">
+              ${isFeatured?'★':'☆'}
+            </button>
+            <button class="btn-action" onclick="toggleProductVisibility('${p.id}')" title="${isHidden?'Exibir':'Ocultar'}">
+              ${isHidden?'👁️ Exibir':'🚫 Ocultar'}
+            </button>
+            <button class="btn-action" onclick="duplicateProduct('${p.id}')" title="Duplicar">📋</button>
+            <button class="btn-action btn-danger" onclick="deleteProduct('${p.id}')" title="Excluir">🗑️</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+// Filtros de Produtos
+document.getElementById("product-search").addEventListener("input", (e)=>{
+  currentSearchTerm = e.target.value.trim();
+  renderProductsTable();
+});
+document.getElementById("product-cat-filter").addEventListener("change", (e)=>{
+  currentCatFilter = e.target.value;
+  renderProductsTable();
+});
+document.getElementById("product-status-filter").addEventListener("change", (e)=>{
+  currentStatusFilter = e.target.value;
+  renderProductsTable();
+});
+
+// Ações de Produto
+function toggleProductFeatured(id){
+  CatalogStore.toggleFeatured(id);
+  renderProductsTable();
+  renderDashboard();
+  toast("Status de destaque atualizado.");
+}
+
+function toggleProductVisibility(id){
+  CatalogStore.toggleVisibility(id);
+  renderProductsTable();
+  renderDashboard();
+  toast("Visibilidade do produto atualizada.");
+}
+
+function duplicateProduct(id){
+  CatalogStore.duplicate(id);
+  renderProductsTable();
+  renderDashboard();
+  toast("Produto duplicado com sucesso!", "success");
+}
+
+function deleteProduct(id){
+  const p = CatalogStore.getById(id);
+  if(!p) return;
+  if(confirm(`Tem certeza que deseja excluir o produto "${p.name}"?`)){
+    CatalogStore.delete(id);
+    renderProductsTable();
+    renderDashboard();
+    toast("Produto excluído.", "success");
+  }
+}
+
+// Modal de Produto
+function openProductModal(prod = null){
+  document.getElementById("modal-prod-id").value = prod ? prod.id : "";
+  document.getElementById("modal-product-title").textContent = prod ? "Editar Produto" : "Cadastrar Novo Produto";
+  document.getElementById("modal-prod-name").value = prod ? prod.name : "";
+  document.getElementById("modal-prod-cat").value = prod ? prod.category : (window.AS_DEFAULT_CATEGORIES[0]?.slug || "camisetas");
+  
+  const hasPrice = prod && prod.price !== undefined && prod.price !== null && prod.price !== "" && Number(prod.price) > 0;
+  document.getElementById("modal-prod-price-type").value = hasPrice ? "valor" : "consulta";
+  document.getElementById("modal-prod-price-val").style.display = hasPrice ? "block" : "none";
+  document.getElementById("modal-prod-price-val").value = hasPrice ? prod.price : "";
+
+  document.getElementById("modal-prod-short").value = prod ? (prod.shortDesc || "") : "";
+  document.getElementById("modal-prod-desc").value = prod ? (prod.description || "") : "";
+  document.getElementById("modal-prod-badges").value = prod && prod.badges ? prod.badges.join(", ") : "Personalizável";
+  document.getElementById("modal-prod-featured").checked = prod ? !!prod.featured : false;
+  document.getElementById("modal-prod-personalizable").checked = prod ? prod.personalizable !== false : true;
+  document.getElementById("modal-prod-biz").checked = prod ? !!prod.isBusiness : false;
+
+  // Occasions
+  const prodOccasions = prod && prod.occasions ? prod.occasions : [];
+  document.querySelectorAll("#modal-occasions-group input").forEach(cb => {
+    cb.checked = prodOccasions.includes(cb.value);
+  });
+
+  // Imagem
+  const currentImg = prod ? (prod.image || "") : "";
+  document.getElementById("modal-prod-image").value = currentImg;
+  document.getElementById("modal-prod-image-url").value = currentImg.startsWith("data:") ? "" : currentImg;
+  
+  if(currentImg){
+    document.getElementById("preview-img").src = currentImg.startsWith("data:") || currentImg.startsWith("http") ? currentImg : "../" + currentImg;
+    document.getElementById("preview-filename").textContent = "Imagem definida";
+    document.getElementById("dropzone-prompt").style.display = "none";
+    document.getElementById("dropzone-preview").style.display = "flex";
+  } else {
+    document.getElementById("dropzone-prompt").style.display = "flex";
+    document.getElementById("dropzone-preview").style.display = "none";
+  }
+
+  document.getElementById("product-modal").classList.add("open");
+}
+
+function closeProductModal(){
+  document.getElementById("product-modal").classList.remove("open");
+}
+
+function editProduct(id){
+  const p = CatalogStore.getById(id);
+  if(p) openProductModal(p);
+}
+
+// Preço toggle
+document.getElementById("modal-prod-price-type").addEventListener("change", (e)=>{
+  const isVal = e.target.value === "valor";
+  document.getElementById("modal-prod-price-val").style.display = isVal ? "block" : "none";
+  if(isVal) document.getElementById("modal-prod-price-val").focus();
+});
+
+// Dropzone de Produto
+const prodDropzone = document.getElementById("prod-dropzone");
+const prodFileInput = document.getElementById("prod-file-input");
+
+prodDropzone.addEventListener("click", (e)=>{
+  if(e.target.closest("button")) return;
+  prodFileInput.click();
+});
+prodFileInput.addEventListener("change", async (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  try {
+    toast("Otimizando imagem...");
+    const compressed = await ImageOptimizer.compressFile(file, 1100, 1100, 0.84);
+    document.getElementById("modal-prod-image").value = compressed;
+    document.getElementById("preview-img").src = compressed;
+    document.getElementById("preview-filename").textContent = file.name + " (" + Math.round(compressed.length/1024) + " KB)";
+    document.getElementById("dropzone-prompt").style.display = "none";
+    document.getElementById("dropzone-preview").style.display = "flex";
+    toast("Foto carregada e otimizada!", "success");
+  } catch(err) {
+    toast("Erro ao processar imagem: " + err.message, "danger");
+  }
+});
+
+function removeProductImage(e){
+  e.stopPropagation();
+  document.getElementById("modal-prod-image").value = "";
+  document.getElementById("modal-prod-image-url").value = "";
+  document.getElementById("prod-file-input").value = "";
+  document.getElementById("dropzone-prompt").style.display = "flex";
+  document.getElementById("dropzone-preview").style.display = "none";
+}
+
+function toggleCustomImageUrl(){
+  const el = document.getElementById("custom-image-url-wrap");
+  el.style.display = el.style.display === "none" ? "block" : "none";
+}
+
+document.getElementById("modal-prod-image-url").addEventListener("input", (e)=>{
+  const val = e.target.value.trim();
+  if(val){
+    document.getElementById("modal-prod-image").value = val;
+    document.getElementById("preview-img").src = val.startsWith("http") ? val : "../" + val;
+    document.getElementById("preview-filename").textContent = "URL: " + val;
+    document.getElementById("dropzone-prompt").style.display = "none";
+    document.getElementById("dropzone-preview").style.display = "flex";
+  }
+});
+
+function saveProductModal(){
+  const id = document.getElementById("modal-prod-id").value;
+  const name = document.getElementById("modal-prod-name").value.trim();
+  if(!name){
+    toast("Por favor, preencha o nome do produto.");
+    document.getElementById("modal-prod-name").focus();
+    return;
+  }
+  const category = document.getElementById("modal-prod-cat").value;
+  const priceType = document.getElementById("modal-prod-price-type").value;
+  const priceVal = document.getElementById("modal-prod-price-val").value;
+  const price = priceType === "valor" && priceVal ? Number(priceVal) : null;
+
+  const shortDesc = document.getElementById("modal-prod-short").value.trim();
+  const description = document.getElementById("modal-prod-desc").value.trim() || shortDesc;
+  const image = document.getElementById("modal-prod-image").value || "";
+  const featured = document.getElementById("modal-prod-featured").checked;
+  const personalizable = document.getElementById("modal-prod-personalizable").checked;
+  const isBusiness = document.getElementById("modal-prod-biz").checked;
+
+  const rawBadges = document.getElementById("modal-prod-badges").value;
+  const badges = rawBadges ? rawBadges.split(",").map(b=>b.trim()).filter(Boolean) : [];
+
+  const occasions = Array.from(document.querySelectorAll("#modal-occasions-group input:checked")).map(cb=>cb.value);
+
+  const productData = {
+    id: id || undefined,
+    name,
+    category,
+    price,
+    shortDesc,
+    description,
+    image,
+    gallery: image ? [image] : [],
+    featured,
+    personalizable,
+    isBusiness,
+    badges,
+    occasions
+  };
+
+  CatalogStore.save(productData);
+  closeProductModal();
+  renderProductsTable();
+  renderDashboard();
+  toast("Produto salvo com sucesso!", "success");
+}
+
+// 6. Pedidos
+function renderOrdersTable(){
+  const orders = Orders.all();
+  const tbody = document.querySelector("#orders-table tbody");
+  if(!orders.length){
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--ink-soft);">Nenhum pedido recebido ainda.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = orders.map(o => `
+    <tr>
+      <td><b>${o.id}</b></td>
+      <td>${o.customerName}</td>
+      <td>${o.phone ? `<a href="https://wa.me/${o.phone.replace(/\D/g,'')}" target="_blank" style="color:var(--turquesa-escuro);">${o.phone}</a>` : '—'}</td>
+      <td>${(o.items||[]).map(i => `${i.qty}x ${i.name}`).join(", ")}</td>
+      <td>${formatDate(o.date)}</td>
+      <td>
+        <select data-order-id="${o.id}" class="admin-select" style="padding:4px 8px;font-size:.76rem;">
+          ${ORDER_STAGES.map(s => `<option value="${s}" ${s===o.status?'selected':''}>${ORDER_LABELS[s]}</option>`).join("")}
+        </select>
+      </td>
+      <td style="text-align:right;">
+        <button class="btn-action btn-danger" onclick="deleteOrder('${o.id}')">Excluir</button>
+      </td>
+    </tr>
+  `).join("");
+
+  document.querySelectorAll("[data-order-id]").forEach(sel => {
+    sel.addEventListener("change", () => {
+      Orders.updateStatus(sel.dataset.orderId, sel.value);
+      toast("Status do pedido atualizado.");
+      renderDashboard();
+    });
+  });
+}
+
+function deleteOrder(id){
+  if(confirm("Deseja remover este pedido do histórico?")){
+    Orders.delete(id);
+    renderOrdersTable();
+    renderDashboard();
+    toast("Pedido removido.");
+  }
+}
+
+// 7. Galeria
+function renderGallery(){
+  const gallery = GalleryStore.getAll();
+  const grid = document.getElementById("admin-gallery-grid");
+  if(!gallery.length){
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-soft);">Nenhuma foto na galeria.</div>`;
+    return;
+  }
+
+  grid.innerHTML = gallery.map((item, idx) => {
+    const src = item.image.startsWith("data:") || item.image.startsWith("http") ? item.image : "../" + item.image;
+    return `
+      <div class="admin-gallery-card">
+        <img src="${src}" alt="${item.caption}">
+        <div class="body">
+          <p>${item.caption}</p>
+          <button class="mini-btn" style="background:#FFEBEB;color:#A82020;border-color:#E06D6D;align-self:flex-start;" onclick="deleteGalleryItem(${idx})">
+            Remover foto
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function openGalleryModal(){
+  document.getElementById("gal-image-val").value = "";
+  document.getElementById("gal-caption-val").value = "";
+  document.getElementById("gal-dropzone-prompt").style.display = "flex";
+  document.getElementById("gal-dropzone-preview").style.display = "none";
+  document.getElementById("gallery-modal").classList.add("open");
+}
+function closeGalleryModal(){
+  document.getElementById("gallery-modal").classList.remove("open");
+}
+
+const galDropzone = document.getElementById("gal-dropzone");
+const galFileInput = document.getElementById("gal-file-input");
+galDropzone.addEventListener("click", (e)=>{
+  if(e.target.closest("button")) return;
+  galFileInput.click();
+});
+galFileInput.addEventListener("change", async (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  try {
+    toast("Processando imagem...");
+    const compressed = await ImageOptimizer.compressFile(file, 1000, 1000, 0.82);
+    document.getElementById("gal-image-val").value = compressed;
+    document.getElementById("gal-preview-img").src = compressed;
+    document.getElementById("gal-preview-filename").textContent = file.name;
+    document.getElementById("gal-dropzone-prompt").style.display = "none";
+    document.getElementById("gal-dropzone-preview").style.display = "flex";
+  } catch(err) {
+    toast("Erro: " + err.message, "danger");
+  }
+});
+function removeGalleryImage(e){
+  e.stopPropagation();
+  document.getElementById("gal-image-val").value = "";
+  document.getElementById("gal-file-input").value = "";
+  document.getElementById("gal-dropzone-prompt").style.display = "flex";
+  document.getElementById("gal-dropzone-preview").style.display = "none";
+}
+
+function saveGalleryModal(){
+  const image = document.getElementById("gal-image-val").value;
+  const caption = document.getElementById("gal-caption-val").value.trim();
+  if(!image){
+    toast("Selecione uma foto.");
+    return;
+  }
+  if(!caption){
+    toast("Escreva uma legenda.");
+    return;
+  }
+  GalleryStore.add({ image, caption });
+  closeGalleryModal();
+  renderGallery();
+  toast("Foto adicionada à galeria!", "success");
+}
+
+function deleteGalleryItem(idx){
+  if(confirm("Deseja remover esta foto da galeria?")){
+    GalleryStore.remove(idx);
+    renderGallery();
+    toast("Foto removida.");
+  }
+}
+
+// 8. Cupons
+function renderCouponsTable(){
+  const list = Coupons.all();
+  const tbody = document.querySelector("#coupons-table tbody");
+  if(!list.length){
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--ink-soft);">Nenhum cupom ativo.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(c => `
+    <tr>
+      <td><strong>${c.code}</strong></td>
+      <td>${c.percent}% de desconto</td>
+      <td><span class="status-pill ${c.active?'active':'hidden'}">${c.active?'Ativo':'Inativo'}</span></td>
+      <td style="text-align:right;">
+        <button class="btn-action btn-danger" onclick="removeCoupon('${c.code}')">Remover</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+function removeCoupon(code){
+  Coupons.remove(code);
+  renderCouponsTable();
+  renderDashboard();
+  toast("Cupom removido.");
+}
+
+document.getElementById("coupon-form").addEventListener("submit", (e)=>{
+  e.preventDefault();
+  const code = document.getElementById("new-coupon-code").value.trim();
+  const percent = document.getElementById("new-coupon-percent").value;
+  if(!code || !percent) return;
+  Coupons.add(code, percent);
+  e.target.reset();
+  renderCouponsTable();
+  renderDashboard();
+  toast("Cupom cadastrado com sucesso!", "success");
+});
+
+// 9. Configurações da Loja
+function renderConfigForm(){
+  const c = ConfigStore.get();
+  document.getElementById("cfg-brand").value = c.brand || "AS Estamparia";
+  document.getElementById("cfg-whatsapp").value = c.whatsappNumber || "";
+  document.getElementById("cfg-email").value = c.email || "";
+  document.getElementById("cfg-instagram").value = c.instagram || "";
+  document.getElementById("cfg-address").value = c.address || "";
+  document.getElementById("cfg-hours").value = c.hours || "";
+  document.getElementById("cfg-payments").value = c.paymentMethods || "";
+  document.getElementById("cfg-delivery").value = c.deliveryInfo || "";
+  document.getElementById("cfg-slogan").value = c.slogan || "";
+  document.getElementById("cfg-wa-msg").value = c.waDefaultMessage || "";
+
+  updateWaPreview();
+}
+
+function updateWaPreview(){
+  const num = (document.getElementById("cfg-whatsapp").value || "").replace(/\D/g, "");
+  const preview = document.getElementById("cfg-wa-preview");
+  if(num){
+    preview.innerHTML = `Link gerado: <a href="https://wa.me/${num}" target="_blank" style="color:var(--turquesa-escuro);font-weight:700;">wa.me/${num} ↗</a>`;
+  } else {
+    preview.textContent = "Link: [digite o número acima com DDD]";
+  }
+}
+document.getElementById("cfg-whatsapp").addEventListener("input", updateWaPreview);
+
+document.getElementById("store-config-form").addEventListener("submit", (e)=>{
+  e.preventDefault();
+  const newConfig = {
+    brand: document.getElementById("cfg-brand").value.trim(),
+    whatsappNumber: document.getElementById("cfg-whatsapp").value.trim().replace(/\D/g, ""),
+    email: document.getElementById("cfg-email").value.trim(),
+    instagram: document.getElementById("cfg-instagram").value.trim(),
+    address: document.getElementById("cfg-address").value.trim(),
+    hours: document.getElementById("cfg-hours").value.trim(),
+    paymentMethods: document.getElementById("cfg-payments").value.trim(),
+    deliveryInfo: document.getElementById("cfg-delivery").value.trim(),
+    slogan: document.getElementById("cfg-slogan").value.trim(),
+    waDefaultMessage: document.getElementById("cfg-wa-msg").value.trim()
+  };
+
+  ConfigStore.save(newConfig);
+  toast("Configurações salvas e aplicadas em todo o site!", "success");
+});
+
+document.getElementById("admin-password-form").addEventListener("submit", (e)=>{
+  e.preventDefault();
+  const current = document.getElementById("pass-current").value;
+  const newP = document.getElementById("pass-new").value;
+  const res = AdminAuth.changePassword(current, newP);
+  if(res.ok){
+    e.target.reset();
+    toast("Senha de acesso atualizada com sucesso!", "success");
+  } else {
+    toast(res.error, "danger");
+  }
+});
+
+// 10. Backup & Ferramentas de Dados
+function downloadBackupJSON(){
+  const jsonStr = DataBackup.exportFullJSON();
+  const blob = new Blob([jsonStr], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `backup_as_estamparia_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("Backup baixado com sucesso!", "success");
+}
+
+function handleRestoreBackup(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const res = DataBackup.importFullJSON(e.target.result);
+    if(res.ok){
+      initAdminData();
+      toast("Backup restaurado com sucesso!", "success");
+    } else {
+      toast(res.error, "danger");
+    }
+  };
+  reader.readAsText(file);
+  input.value = "";
+}
+
+function downloadProductsJS(){
+  const jsStr = DataBackup.generateProductsJS();
+  const blob = new Blob([jsStr], { type: "application/javascript" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "products.js";
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("Arquivo products.js gerado e baixado!", "success");
+}
+
+function downloadConfigJS(){
+  const jsStr = DataBackup.generateConfigJS();
+  const blob = new Blob([jsStr], { type: "application/javascript" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "config.js";
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("Arquivo config.js gerado e baixado!", "success");
+}
+
+function handleResetFactory(){
+  if(confirm("⚠️ ATENÇÃO: Deseja realmente restaurar as configurações e catálogo de fábrica? Todas as adições e personalizações locais serão reiniciadas para o padrão inicial.")){
+    CatalogStore.resetToDefaults();
+    GalleryStore.resetToDefaults();
+    ConfigStore.resetToDefaults();
+    initAdminData();
+    toast("Catálogo de fábrica restaurado com sucesso!", "success");
+  }
+}
+
+// Inicia checando a autenticação
+checkAuth();
 </script>
 </body>
 </html>

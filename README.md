@@ -98,20 +98,28 @@ pronto salvo no projeto — foi um processo pontual; para repetir, use
 `rembg` diretamente sobre a foto original e recorte o resultado no editor
 de imagem de preferência.
 
-## Sobre o carrinho, conta e painel admin (importante)
+## Painel Administrativo do Lojista (`/admin`)
 
-Este é um **protótipo front-end completo**: carrinho, favoritos, login,
-pedidos e cupons funcionam de verdade no navegador (gravunder em
-`localStorage`), o que já permite demonstrar toda a jornada de compra —
-mas os dados ficam **gravados apenas no navegador** (não são
-compartilhados entre dispositivos/pessoas nem salvos em um banco de dados
-real).
+O site inclui um **Painel de Gestão Completo e Autônomo** para o cliente gerenciar todo o site sem precisar mexer em código:
 
-Para produção de verdade (pagamentos, estoque, múltiplos usuários vendo o
-mesmo painel admin, envio de e-mail, etc.), é necessário conectar um
-backend/plataforma de e-commerce (ex.: Nuvemshop, Shopify, WooCommerce, ou
-uma API própria) no lugar de `js/store.js`. O restante do site (visual,
-copy, estrutura) pode ser reaproveitado.
+* **URL de acesso:** `/admin/index.html` ou pelo link "Acesso Administrativo" na página `conta.html`.
+* **Senha padrão:** `admin123` (pode ser alterada a qualquer momento na aba Configurações).
+* **Funcionalidades incluídas:**
+  1. **Gestão de Produtos (CRUD Completo):**
+     * Cadastrar novos produtos com foto (upload direto com compressão inteligente no navegador).
+     * Editar produtos existentes (nome, categoria, preço fixo ou sob consulta, descrições, tags).
+     * Destacar ou ocultar produtos da vitrine da Home.
+     * Duplicar produtos e excluir.
+  2. **Configurações da Loja:**
+     * Alterar número de WhatsApp, e-mail, Instagram, horários, endereço e formas de pagamento com prévia em tempo real do link `wa.me`.
+  3. **Galeria de Trabalhos:**
+     * Adicionar e remover fotos de trabalhos reais com legendas.
+  4. **Pedidos e Cupons:**
+     * Acompanhar pedidos recebidos pelo checkout e criar cupons de desconto.
+  5. **Backup & Exportação:**
+     * Download de backup completo em JSON em 1 clique.
+     * Restauração de backup JSON.
+     * Exportação dos arquivos físicos `products.js` e `config.js`.
 
 O checkout não processa pagamento: ele monta um resumo do pedido e abre o
 WhatsApp configurado em `js/config.js`, como pedido no briefing (foco em

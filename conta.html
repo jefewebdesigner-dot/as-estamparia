@@ -106,7 +106,9 @@
         <div class="field"><label>Senha</label><input type="password" required minlength="4"></div>
         <button class="btn btn-block btn-lg" type="submit">Criar Conta</button>
       </form>
-      <p style="text-align:center;font-size:.8rem;color:var(--ink-soft);margin-top:16px;">Protótipo de loja: seus dados ficam salvos apenas neste navegador (localStorage), sem envio a nenhum servidor.</p>
+      <div style="text-align:center;margin-top:24px;padding-top:16px;border-top:1px dashed var(--line);">
+        <a href="admin/index.html" class="link-arrow" style="font-size:.84rem;color:var(--roxo);font-weight:700;">🔒 Acesso Administrativo (Lojista) →</a>
+      </div>
     `;
     document.querySelectorAll(".account-tabs button").forEach(btn=>{
       btn.addEventListener("click", ()=>{

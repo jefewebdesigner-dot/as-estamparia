@@ -173,10 +173,11 @@ document.getElementById("product-layout").innerHTML = `
     <h1 style="margin-top:12px;">${product.name}</h1>
     <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
       ${(product.badges||[]).map(b=>`<span class="badge roxo">${b}</span>`).join("")}
+      ${product.featured ? `<span class="badge" style="background:#FFF3D6;color:#936000;border:1px solid #E9CE8A;">★ Destaque</span>` : ""}
     </div>
     <div class="price-block">
-      <div class="price">Sob consulta</div>
-      <div class="note">O valor final depende do modelo, tamanho, quantidade e tipo de personalização. Peça um orçamento sem compromisso.</div>
+      <div class="price">${(product.price && !isNaN(product.price) && Number(product.price) > 0) ? `A partir de R$ ${Number(product.price).toFixed(2).replace('.', ',')}` : 'Sob consulta'}</div>
+      <div class="note">O valor final pode variar conforme tamanho, quantidade e personalização. Solicite um orçamento sem compromisso.</div>
     </div>
     <p class="product-desc">${product.shortDesc}</p>
     <div class="meta-row">

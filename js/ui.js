@@ -156,16 +156,22 @@ function productMediaHTML(p, size=84){
 function productCardHTML(p){
   const cat = getCategory(p.category);
   const isFav = Favorites.has(p.id);
+  const hasPrice = p.price !== undefined && p.price !== null && p.price !== "" && !isNaN(p.price) && Number(p.price) > 0;
+  const priceHTML = hasPrice
+    ? `A partir de R$ ${Number(p.price).toFixed(2).replace('.', ',')}<small>Valor base personalizável</small>`
+    : `Sob consulta<small>Valor calculado conforme personalização</small>`;
+
   return `
   <article class="product-card" data-id="${p.id}">
     <div class="product-media">
       <button class="fav-toggle ${isFav?'active':''}" data-fav="${p.id}" aria-label="Favoritar">${isFav?Icons.heartFill:Icons.heart}</button>
       <a href="produto.html?id=${p.id}">${productMediaHTML(p,90)}</a>
+      ${p.featured ? `<span class="badge-featured" title="Destaque">★</span>` : ""}
     </div>
     <div class="product-body">
       <span class="product-cat">${cat?cat.name:''}</span>
       <h3><a href="produto.html?id=${p.id}">${p.name}</a></h3>
-      <div class="product-price">Sob consulta<small>Valor calculado conforme personalização</small></div>
+      <div class="product-price">${priceHTML}</div>
       <div class="product-actions">
         <a class="btn btn-sm btn-block" href="produto.html?id=${p.id}">Personalizar</a>
       </div>

@@ -8,7 +8,7 @@
    priceFrom = null e são exibidos como "Sob consulta".
    ========================================================================== */
 
-window.AS_CATEGORIES = [
+window.AS_DEFAULT_CATEGORIES = [
   { slug:"camisetas", name:"Camisetas Personalizadas", desc:"Fotos, frases, logotipos e artes exclusivas em algodão de qualidade.", icon:"tshirt", image:"assets/camiseta-brasil.webp" },
   { slug:"canecas", name:"Canecas Personalizadas", desc:"Uma lembrança especial para presentear ou usar todos os dias.", icon:"mug", image:"assets/caneca-papai.webp" },
   { slug:"copos", name:"Copos Personalizados", desc:"Nomes, frases e artes para festas, eventos e empresas.", icon:"cup" },
@@ -19,8 +19,9 @@ window.AS_CATEGORIES = [
   { slug:"presentes", name:"Presentes Personalizados", desc:"Fotos, nomes e histórias transformadas em presentes únicos.", icon:"gift", image:"assets/presente.webp" },
   { slug:"empresas", name:"Personalizados para Empresas", desc:"Peças e brindes com a identidade visual da sua marca.", icon:"briefcase" }
 ];
+window.AS_CATEGORIES = window.AS_DEFAULT_CATEGORIES.slice();
 
-window.AS_OCCASIONS = [
+window.AS_DEFAULT_OCCASIONS = [
   { slug:"aniversario", name:"Aniversário", icon:"cake" },
   { slug:"dia-das-maes", name:"Dia das Mães", icon:"flower" },
   { slug:"dia-dos-pais", name:"Dia dos Pais", icon:"tie" },
@@ -32,8 +33,9 @@ window.AS_OCCASIONS = [
   { slug:"padrinhos", name:"Padrinhos e Madrinhas", icon:"star" },
   { slug:"professores", name:"Professores", icon:"book" }
 ];
+window.AS_OCCASIONS = window.AS_DEFAULT_OCCASIONS.slice();
 
-window.AS_PRODUCTS = [
+window.AS_DEFAULT_PRODUCTS = [
   {
     id:"camiseta-brasil", name:"Camiseta Brasil Coração", category:"camisetas",
     image:"assets/camiseta-brasil.webp", gallery:["assets/camiseta-brasil.webp"],
@@ -148,10 +150,7 @@ window.AS_PRODUCTS = [
   }
 ];
 
-/* Fotos reais de trabalhos já produzidos pela AS Estamparia — usadas na
-   Galeria como portfólio (algumas contêm fotos e nomes de clientes,
-   por isso ficam apenas na galeria e não como itens "à venda" no catálogo). */
-window.AS_GALLERY = [
+window.AS_DEFAULT_GALLERY = [
   { image:"assets/camiseta-legado.webp", caption:"Camiseta com ilustração personalizada" },
   { image:"assets/caneca-ayla.webp", caption:"Caneca retrato pet" },
   { image:"assets/camiseta-papa-vovo.webp", caption:"Camiseta personalizada em família" },
@@ -167,7 +166,58 @@ window.AS_GALLERY = [
   { image:"assets/presente.webp", caption:"Kit presente personalizado" }
 ];
 
+// Função de atualização do catálogo unificado
+window.refreshCatalog = function(includeHidden = false){
+  try {
+    const customList = JSON.parse(localStorage.getItem("as_custom_products") || "[]");
+    const deletedList = JSON.parse(localStorage.getItem("as_deleted_products") || "[]");
+    const overrides = JSON.parse(localStorage.getItem("as_product_overrides") || "{}");
+
+    // Mapa base com produtos padrão
+    const productMap = new Map();
+    window.AS_DEFAULT_PRODUCTS.forEach(p => {
+      if (!deletedList.includes(p.id)) {
+        const ov = overrides[p.id] || {};
+        productMap.set(p.id, { ...p, ...ov });
+      }
+    });
+
+    // Mescla produtos customizados adicionados/editados no admin
+    customList.forEach(cp => {
+      if (!deletedList.includes(cp.id)) {
+        const ov = overrides[cp.id] || {};
+        productMap.set(cp.id, { ...cp, ...ov });
+      }
+    });
+
+    let merged = Array.from(productMap.values());
+
+    // Se não for o painel admin requisitando tudo, filtra os itens ocultos
+    if (!includeHidden) {
+      merged = merged.filter(p => !p.hidden);
+    }
+
+    window.AS_PRODUCTS = merged;
+
+    // Galeria
+    const customGallery = JSON.parse(localStorage.getItem("as_custom_gallery") || "null");
+    if (customGallery && Array.isArray(customGallery)) {
+      window.AS_GALLERY = customGallery;
+    } else {
+      window.AS_GALLERY = window.AS_DEFAULT_GALLERY.slice();
+    }
+  } catch(e) {
+    console.error("Erro ao carregar catálogo dinâmico:", e);
+    window.AS_PRODUCTS = window.AS_DEFAULT_PRODUCTS.slice();
+    window.AS_GALLERY = window.AS_DEFAULT_GALLERY.slice();
+  }
+};
+
+// Inicialização imediata
+window.refreshCatalog();
+
 function getProductById(id){ return window.AS_PRODUCTS.find(p=>p.id===id); }
 function getCategory(slug){ return window.AS_CATEGORIES.find(c=>c.slug===slug); }
 function productsByCategory(slug){ return window.AS_PRODUCTS.filter(p=>p.category===slug); }
 function featuredProducts(){ return window.AS_PRODUCTS.filter(p=>p.featured); }
+
