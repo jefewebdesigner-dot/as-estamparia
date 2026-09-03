@@ -207,34 +207,54 @@ document.querySelectorAll(".gallery-thumbs button").forEach(btn=>{
 });
 
 /* ===================== Fluxo de personalização ===================== */
-const sizes = ["PP","P","M","G","GG"];
-const colors = [
+const defaultSizes = ["PP","P","M","G","GG"];
+const defaultColors = [
   {n:"Branco", hex:"#FFFFFF"}, {n:"Preto", hex:"#1a1a1a"}, {n:"Roxo AS", hex:"#6D2C91"}, {n:"Turquesa", hex:"#46C5BE"}
 ];
+// Se o produto tem tamanhos/cores definidos no painel, usa-os; um array vazio
+// significa "sem essa opção" e a etapa correspondente deixa de aparecer.
+const sizes = Array.isArray(product.sizes) ? product.sizes : defaultSizes;
+const colors = Array.isArray(product.colors)
+  ? product.colors.map(c => typeof c === "string" ? {n:c, hex:"#CCCCCC"} : {n:(c.n || c.name || "Cor"), hex:(c.hex || "#CCCCCC")})
+  : defaultColors;
+const hasSizes = sizes.length > 0;
+const hasColors = colors.length > 0;
 let uploadedFiles = [];
 const selection = { model: product.name, size:"", color:"", type:"", approval:true };
 
-document.getElementById("custom-flow").innerHTML = `
+let stepNum = 0;
+const steps = [];
+steps.push(`
   <div class="custom-step">
-    <h4><span class="n">1</span>Escolha do modelo</h4>
+    <h4><span class="n">${++stepNum}</span>Escolha do modelo</h4>
     <p style="font-size:.85rem;color:var(--ink-soft);margin-bottom:10px;">Modelo selecionado: <strong>${product.name}</strong>. Para ver outros modelos, <a class="link-arrow" href="produtos.html?categoria=${product.category}">volte ao catálogo</a>.</p>
   </div>
+`);
+if(hasSizes){
+  steps.push(`
   <div class="custom-step">
-    <h4><span class="n">2</span>Escolha do tamanho</h4>
+    <h4><span class="n">${++stepNum}</span>Escolha do tamanho</h4>
     <div class="pill-options" id="size-options">${sizes.map(s=>`<button type="button" class="pill-opt" data-size="${s}">${s}</button>`).join("")}</div>
   </div>
+  `);
+}
+if(hasColors){
+  steps.push(`
   <div class="custom-step">
-    <h4><span class="n">3</span>Escolha da cor</h4>
+    <h4><span class="n">${++stepNum}</span>Escolha da cor</h4>
     <div class="color-swatches" id="color-options">${colors.map(c=>`<button type="button" class="swatch" data-color="${c.n}" style="background:${c.hex}" title="${c.n}"></button>`).join("")}</div>
   </div>
+  `);
+}
+steps.push(`
   <div class="custom-step">
-    <h4><span class="n">4</span>Tipo de personalização</h4>
+    <h4><span class="n">${++stepNum}</span>Tipo de personalização</h4>
     <div class="pill-options" id="type-options">
       ${["Foto","Frase / Texto","Nome","Logotipo / Arte própria","Quero ajuda para criar a arte"].map(t=>`<button type="button" class="pill-opt" data-type="${t}">${t}</button>`).join("")}
     </div>
   </div>
   <div class="custom-step">
-    <h4><span class="n">5</span>Upload da arte</h4>
+    <h4><span class="n">${++stepNum}</span>Upload da arte</h4>
     <label class="upload-zone" id="upload-zone">
       ${Icons.upload}
       <p><strong>Clique para enviar</strong> ou arraste seus arquivos aqui</p>
@@ -244,16 +264,17 @@ document.getElementById("custom-flow").innerHTML = `
     <div class="upload-list" id="upload-list"></div>
   </div>
   <div class="custom-step">
-    <h4><span class="n">6</span>Frase, nome ou observações</h4>
+    <h4><span class="n">${++stepNum}</span>Frase, nome ou observações</h4>
     <div class="field" style="margin-bottom:0;">
       <textarea id="obs-field" rows="3" placeholder="Ex: nome 'Maria', frase 'Família é tudo', cor de fundo, referência de estilo..."></textarea>
     </div>
   </div>
   <div class="custom-step">
-    <h4><span class="n">7</span>Aprovação da arte</h4>
+    <h4><span class="n">${++stepNum}</span>Aprovação da arte</h4>
     <label class="checkbox-line"><input type="checkbox" id="approval-check" checked> Quero aprovar a arte antes da produção (recomendado)</label>
   </div>
-`;
+`);
+document.getElementById("custom-flow").innerHTML = steps.join("");
 
 document.querySelectorAll("#size-options .pill-opt").forEach(b=>b.addEventListener("click",()=>{
   document.querySelectorAll("#size-options .pill-opt").forEach(x=>x.classList.remove("selected"));

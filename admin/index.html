@@ -461,6 +461,23 @@
           <label>Tags / Destaques do Produto (separadas por vírgula)</label>
           <input type="text" id="modal-prod-badges" placeholder="Ex: Personalizável, Retrato, Pet, Exclusivo">
         </div>
+
+        <div class="admin-field full">
+          <label>Opções de Tamanho (separadas por vírgula)</label>
+          <input type="text" id="modal-prod-sizes" placeholder="Ex: PP, P, M, G, GG">
+          <span class="help-text">Aparecem na página do produto para o cliente escolher. Deixe em branco se o produto não tem tamanho (ex: caneca, quadro).</span>
+        </div>
+
+        <div class="admin-field full">
+          <label>Opções de Cor</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <input type="text" id="modal-color-name" placeholder="Nome da cor (ex: Branco)" style="flex:1;min-width:140px;">
+            <input type="color" id="modal-color-hex" value="#6D2C91" style="width:48px;height:40px;padding:2px;border-radius:8px;border:1.5px solid var(--ink);cursor:pointer;background:var(--branco);">
+            <button type="button" class="mini-btn" onclick="addModalColor()">+ Adicionar cor</button>
+          </div>
+          <div id="modal-colors-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
+          <span class="help-text">Aparecem como bolinhas na página do produto. Deixe em branco se o produto não tem opção de cor.</span>
+        </div>
       </div>
 
       <!-- Opções adicionais -->
@@ -546,6 +563,7 @@
 let currentSearchTerm = "";
 let currentCatFilter = "todos";
 let currentStatusFilter = "todos";
+let modalColors = []; // [{ n:"Branco", hex:"#FFFFFF" }]
 
 // 1. Checagem de Autenticação
 function checkAuth(){
@@ -792,6 +810,23 @@ function openProductModal(prod = null){
   document.getElementById("modal-prod-short").value = prod ? (prod.shortDesc || "") : "";
   document.getElementById("modal-prod-desc").value = prod ? (prod.description || "") : "";
   document.getElementById("modal-prod-badges").value = prod && prod.badges ? prod.badges.join(", ") : "Personalizável";
+
+  // Tamanhos e Cores.
+  // Se o produto ainda não tem esses campos definidos, começamos com os
+  // padrões que o site já exibe (PP–GG e 4 cores) para não remover opções
+  // sem querer. Para um produto sem tamanho/cor, basta limpar os campos.
+  const DEFAULT_SIZES = ["PP", "P", "M", "G", "GG"];
+  const DEFAULT_COLORS = [
+    { n: "Branco", hex: "#FFFFFF" }, { n: "Preto", hex: "#1A1A1A" },
+    { n: "Roxo AS", hex: "#6D2C91" }, { n: "Turquesa", hex: "#46C5BE" }
+  ];
+  const sizesArr = prod && Array.isArray(prod.sizes) ? prod.sizes : DEFAULT_SIZES;
+  document.getElementById("modal-prod-sizes").value = sizesArr.join(", ");
+  modalColors = (prod && Array.isArray(prod.colors) ? prod.colors : DEFAULT_COLORS)
+    .map(c => (typeof c === "string" ? { n: c, hex: "#CCCCCC" } : { n: c.n || c.name || "Cor", hex: c.hex || "#CCCCCC" }));
+  document.getElementById("modal-color-name").value = "";
+  renderModalColors();
+
   document.getElementById("modal-prod-featured").checked = prod ? !!prod.featured : false;
   document.getElementById("modal-prod-personalizable").checked = prod ? prod.personalizable !== false : true;
   document.getElementById("modal-prod-biz").checked = prod ? !!prod.isBusiness : false;
@@ -823,6 +858,50 @@ function openProductModal(prod = null){
 function closeProductModal(){
   document.getElementById("product-modal").classList.remove("open");
 }
+
+// Construtor de cores do produto
+function renderModalColors(){
+  const list = document.getElementById("modal-colors-list");
+  if(!modalColors.length){
+    list.innerHTML = `<span style="font-size:.8rem;color:var(--ink-soft);">Nenhuma cor adicionada.</span>`;
+    return;
+  }
+  list.innerHTML = modalColors.map((c, i) => `
+    <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1.5px solid var(--ink);border-radius:20px;background:var(--branco);font-size:.78rem;font-weight:600;">
+      <span style="width:16px;height:16px;border-radius:50%;border:1px solid var(--line);background:${c.hex};display:inline-block;"></span>
+      ${c.n}
+      <button type="button" onclick="removeModalColor(${i})" style="border:none;background:none;cursor:pointer;font-size:.9rem;line-height:1;color:#A82020;padding:0;">✕</button>
+    </span>
+  `).join("");
+}
+
+function addModalColor(){
+  const nameEl = document.getElementById("modal-color-name");
+  const hexEl = document.getElementById("modal-color-hex");
+  const n = nameEl.value.trim();
+  if(!n){
+    toast("Digite o nome da cor.");
+    nameEl.focus();
+    return;
+  }
+  if(modalColors.some(c => c.n.toLowerCase() === n.toLowerCase())){
+    toast("Essa cor já foi adicionada.");
+    return;
+  }
+  modalColors.push({ n, hex: hexEl.value || "#CCCCCC" });
+  nameEl.value = "";
+  nameEl.focus();
+  renderModalColors();
+}
+
+function removeModalColor(i){
+  modalColors.splice(i, 1);
+  renderModalColors();
+}
+
+document.getElementById("modal-color-name").addEventListener("keydown", (e)=>{
+  if(e.key === "Enter"){ e.preventDefault(); addModalColor(); }
+});
 
 function editProduct(id){
   const p = CatalogStore.getById(id);
@@ -911,6 +990,10 @@ function saveProductModal(){
 
   const occasions = Array.from(document.querySelectorAll("#modal-occasions-group input:checked")).map(cb=>cb.value);
 
+  const rawSizes = document.getElementById("modal-prod-sizes").value;
+  const sizes = rawSizes ? rawSizes.split(",").map(s=>s.trim()).filter(Boolean) : [];
+  const colors = modalColors.map(c => ({ n: c.n, hex: c.hex }));
+
   const productData = {
     id: id || undefined,
     name,
@@ -924,7 +1007,9 @@ function saveProductModal(){
     personalizable,
     isBusiness,
     badges,
-    occasions
+    occasions,
+    sizes,
+    colors
   };
 
   CatalogStore.save(productData);
