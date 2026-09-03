@@ -10,3 +10,6 @@ Thumbs.db
 
 # Estado interno de ferramentas locais (não faz parte do site)
 .claude/
+
+.vercel
+.env*.local
