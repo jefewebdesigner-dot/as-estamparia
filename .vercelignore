@@ -1,0 +1,6 @@
+.chat-history.json*
+.references
+.zheus
+uploads
+AGENTS.md
+CLAUDE.md
