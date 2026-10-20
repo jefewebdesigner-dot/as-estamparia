@@ -7,7 +7,10 @@ Ele preserva decisões e estado do projeto sem reenviar conversas inteiras.
 
 ## Última validação automática
 
-- Status: passed · score 100/100
+- Status: passed · score 97/100
+- 1280px: erros registrados no console.
+- 768px: erros registrados no console.
+- 360px: erros registrados no console.
 
 ## O que já foi feito
 

@@ -70,19 +70,22 @@
       <form class="card-panel" id="contact-form">
         <h3 style="color:var(--roxo);margin-bottom:16px;">Envie uma mensagem</h3>
         <div class="field-row">
-          <div class="field"><label>Nome</label><input type="text" required placeholder="Seu nome"></div>
-          <div class="field"><label>WhatsApp / telefone</label><input type="tel" required placeholder="(00) 00000-0000"></div>
+          <div class="field"><label for="ct-name">Nome</label><input type="text" id="ct-name" required placeholder="Seu nome" autocomplete="name"></div>
+          <div class="field"><label for="ct-phone">WhatsApp / telefone</label><input type="tel" id="ct-phone" required placeholder="(00) 00000-0000" autocomplete="tel"></div>
         </div>
-        <div class="field"><label>Assunto</label>
-          <select>
+        <div class="field"><label for="ct-email">E-mail <span class="hint">(opcional)</span></label><input type="email" id="ct-email" placeholder="seu@email.com" autocomplete="email"></div>
+        <input type="text" name="website" id="ct-website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;">
+        <div class="field"><label for="ct-subject">Assunto</label>
+          <select id="ct-subject">
             <option>Orçamento de produto</option>
             <option>Orçamento empresarial</option>
             <option>Dúvidas sobre um pedido</option>
             <option>Outro assunto</option>
           </select>
         </div>
-        <div class="field"><label>Mensagem</label><textarea rows="5" required placeholder="Como podemos ajudar?"></textarea></div>
-        <button class="btn btn-lg btn-block" type="submit">Enviar pelo WhatsApp</button>
+        <div class="field"><label for="ct-message">Mensagem</label><textarea id="ct-message" rows="5" required placeholder="Como podemos ajudar?"></textarea></div>
+        <div class="form-feedback" id="ct-feedback" role="status" aria-live="polite"></div>
+        <button class="btn btn-lg btn-block" type="submit" id="ct-submit">Enviar mensagem</button>
       </form>
     </div>
 
@@ -137,16 +140,42 @@
 <script src="js/store.js"></script>
 <script src="js/ui.js"></script>
 <script>
+// Aguarda os dados do servidor (catálogo, configurações) antes de montar a página.
+window.AS_READY.then(()=>{
   const contactIcons = [Icons.pin, Icons.whatsapp, Icons.mail, Icons.spark, Icons.clock];
   document.querySelectorAll(".card-panel .meta-item .ic-inline").forEach((el,i)=>{ el.innerHTML = contactIcons[i]; });
   const noticeIcon = document.querySelector(".notice-box .ic-inline");
   if(noticeIcon) noticeIcon.innerHTML = Icons.shield;
 
-  document.getElementById("contact-form").addEventListener("submit",(e)=>{
+  // Cadastra o contato no painel e, se houver WhatsApp configurado, abre a conversa.
+  const contactForm = document.getElementById("contact-form");
+  const ctFeedback = document.getElementById("ct-feedback");
+  const ctSubmit = document.getElementById("ct-submit");
+  contactForm.addEventListener("submit", async (e)=>{
     e.preventDefault();
-    const inputs = e.target.querySelectorAll("input, textarea, select");
-    const [nome, tel, assunto, msgTxt] = [inputs[0].value, inputs[1].value, inputs[2].value, inputs[3].value];
-    goToWhatsApp(`Olá! Meu nome é ${nome} (${tel}).\nAssunto: ${assunto}\nMensagem: ${msgTxt}`);
+    const record = {
+      kind: "contato",
+      name: document.getElementById("ct-name").value.trim(),
+      phone: document.getElementById("ct-phone").value.trim(),
+      email: document.getElementById("ct-email").value.trim(),
+      subject: document.getElementById("ct-subject").value,
+      message: document.getElementById("ct-message").value.trim(),
+      website: document.getElementById("ct-website").value
+    };
+    ctSubmit.disabled = true; ctSubmit.textContent = "Enviando...";
+    ctFeedback.className = "form-feedback"; ctFeedback.textContent = "";
+    try {
+      await saveThenWhatsApp(Leads.create(record),
+        `Olá! Meu nome é ${record.name} (${record.phone}).\nAssunto: ${record.subject}\nMensagem: ${record.message}`);
+      contactForm.reset();
+      ctFeedback.className = "form-feedback success";
+      ctFeedback.textContent = "Mensagem enviada! Recebemos seu contato e vamos responder em breve.";
+    } catch(err) {
+      ctFeedback.className = "form-feedback error";
+      ctFeedback.textContent = err.message;
+    } finally {
+      ctSubmit.disabled = false; ctSubmit.textContent = "Enviar mensagem";
+    }
   });
 
   const allFaqs = [
@@ -164,6 +193,7 @@
     <div class="faq-item"><button class="faq-q"><span>${q}</span><span class="plus">+</span></button><div class="faq-a"><div class="faq-a-inner">${a}</div></div></div>`).join("");
   initFaq();
   applyContactInfo();
+});
 </script>
 </body>
 </html>

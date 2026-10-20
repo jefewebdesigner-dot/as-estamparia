@@ -139,9 +139,12 @@
 <script src="js/store.js"></script>
 <script src="js/ui.js"></script>
 <script>
+// Aguarda os dados do servidor (catálogo, configurações) antes de montar a página.
+window.AS_READY.then(()=>{
   const aboutIcons = [Icons.spark, Icons.shield, Icons.brush, Icons.chat, Icons.heart];
   document.querySelectorAll("#idea-section .ic").forEach(()=>{}); // no-op guard
   document.querySelectorAll(".icon-row .ic").forEach((el,i)=>{ el.innerHTML = aboutIcons[i] || Icons.star; });
+});
 </script>
 </body>
 </html>

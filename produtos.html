@@ -112,6 +112,8 @@
 <script src="js/store.js"></script>
 <script src="js/ui.js"></script>
 <script>
+// Aguarda os dados do servidor (catálogo, configurações) antes de montar a página.
+window.AS_READY.then(()=>{
   const params = new URLSearchParams(location.search);
   let activeCat = params.get("categoria") || "todos";
   let searchTerm = (params.get("busca") || "").toLowerCase();
@@ -146,6 +148,7 @@
 
   renderFilters();
   renderProducts();
+});
 </script>
 </body>
 </html>

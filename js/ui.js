@@ -89,6 +89,84 @@ function goToWhatsApp(message){
   window.open(link, "_blank");
 }
 
+/* Salva algo no servidor e depois abre o WhatsApp. A aba é aberta já no
+   clique (antes de esperar o servidor) para o navegador não bloquear o pop-up. */
+async function saveThenWhatsApp(savePromise, message){
+  const link = waLink(message);
+  const win = link ? window.open("", "_blank") : null;
+  try {
+    const result = await savePromise;
+    if(link){
+      if(win) win.location.href = link; else window.location.href = link;
+    }
+    return result;
+  } catch(err) {
+    if(win) win.close();
+    throw err;
+  }
+}
+
+/* ---------------------------------- Upload de arquivos ------------------------ */
+/* Liga uma área de upload (label com input file dentro): clique, arrastar e
+   soltar, envio ao servidor e lista de arquivos. Retorna { files, busy(), clear() }. */
+function initUploadZone({ zone, input, list }){
+  const files = []; // { name, url, status:"enviando"|"ok"|"erro", error }
+  function render(){
+    list.innerHTML = files.map((f, i) => {
+      const ext = f.name.split(".").pop().toUpperCase().slice(0,3);
+      const state = f.status === "enviando" ? " (enviando...)" : f.status === "erro" ? " — " + f.error : "";
+      const name = f.url ? `<a href="${f.url}" target="_blank" rel="noopener">${escapeHTML(f.name)}</a>` : escapeHTML(f.name);
+      return `<span class="upload-chip ${f.status}"><span class="ic">${ext}</span>${name}${state}<button type="button" data-remove="${i}" aria-label="Remover">${Icons.close}</button></span>`;
+    }).join("");
+    list.querySelectorAll("[data-remove]").forEach(btn => btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      files.splice(Number(btn.dataset.remove), 1); render();
+    }));
+  }
+  function add(fileList){
+    Array.from(fileList).forEach(file => {
+      const entry = { name: file.name, url: "", status: "enviando" };
+      files.push(entry);
+      FileUpload.upload(file)
+        .then(saved => { entry.url = saved.url; entry.status = "ok"; })
+        .catch(err => { entry.status = "erro"; entry.error = err.message; toast(err.message); })
+        .finally(render);
+    });
+    render();
+  }
+  // O input fica dentro do label: o clique do próprio input não pode ser
+  // cancelado, senão o seletor de arquivos nunca abre.
+  zone.addEventListener("click", (e) => {
+    if(e.target === input) return;
+    e.preventDefault();
+    input.click();
+  });
+  input.addEventListener("change", () => { add(input.files); input.value = ""; });
+  // Arquivos escolhidos antes de a página terminar de carregar
+  if(input.files && input.files.length){ add(input.files); input.value = ""; }
+  zone.addEventListener("dragover", (e) => { e.preventDefault(); zone.classList.add("dragging"); });
+  zone.addEventListener("dragleave", () => zone.classList.remove("dragging"));
+  zone.addEventListener("drop", (e) => {
+    e.preventDefault(); zone.classList.remove("dragging");
+    if(e.dataTransfer?.files?.length) add(e.dataTransfer.files);
+  });
+  return {
+    files,
+    busy(){ return files.some(f => f.status === "enviando"); },
+    uploaded(){ return files.filter(f => f.status === "ok").map(f => ({ name: f.name, url: f.url })); },
+    clear(){ files.length = 0; render(); }
+  };
+}
+
+function escapeHTML(str){
+  return String(str ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+}
+
+/* Link absoluto de um arquivo enviado (para mensagens de WhatsApp). */
+function absoluteUrl(url){
+  try { return new URL(url, location.origin).href; } catch(e) { return url; }
+}
+
 /* ---------------------------------- Header / Nav ------------------------------ */
 function initHeader(){
   const hamburger = document.querySelector("[data-hamburger]");
@@ -258,6 +336,8 @@ function applyContactInfo(){
   if(igLink && c.instagram){ igLink.href = "https://instagram.com/" + c.instagram.replace(/^@/, ""); }
 
   document.querySelectorAll("[data-wa-btn]").forEach(btn=>{
+    if(btn.dataset.waBound) return;
+    btn.dataset.waBound = "1";
     btn.addEventListener("click", (e)=>{
       if(btn.tagName==="A") e.preventDefault();
       goToWhatsApp(btn.getAttribute("data-wa-msg") || undefined);
@@ -270,4 +350,5 @@ document.addEventListener("DOMContentLoaded", ()=>{
   wireFavButtons();
   initFaq();
   applyContactInfo();
+  window.AS_READY.then(applyContactInfo);
 });

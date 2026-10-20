@@ -34,6 +34,113 @@ function writeLS(key, value){
   }
 }
 
+/* ---------------------------------- API (servidor) -------------------------- */
+const ADMIN_TOKEN_KEY = "as_admin_token";
+const Api = {
+  async request(path, { method = "GET", body, admin = false, timeout = 20000 } = {}){
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeout);
+    const headers = {};
+    if(body !== undefined) headers["Content-Type"] = "application/json";
+    if(admin) headers["x-admin-token"] = sessionStorage.getItem(ADMIN_TOKEN_KEY) || "";
+    let res, data;
+    try {
+      res = await fetch("/api/" + path, { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined, signal: ctrl.signal, cache: "no-store" });
+      data = await res.json().catch(() => ({}));
+    } catch(e) {
+      throw new Error(e.name === "AbortError" ? "O servidor demorou para responder. Tente novamente." : "Sem conexão com o servidor. Verifique sua internet.");
+    } finally {
+      clearTimeout(timer);
+    }
+    if(res.status === 401 && admin){
+      sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+      document.dispatchEvent(new CustomEvent("as:admin-unauthorized"));
+    }
+    if(!res.ok || data.ok === false) throw new Error(data.error || "Erro ao comunicar com o servidor (" + res.status + ").");
+    return data;
+  }
+};
+
+/* Dados compartilhados (config, catálogo, galeria, cupons) vivem no servidor.
+   O localStorage funciona só como cache para o site abrir rápido. */
+const SHARED_KEYS = {
+  customConfig: AS_KEYS.customConfig,
+  customProducts: AS_KEYS.customProducts,
+  deletedProducts: AS_KEYS.deletedProducts,
+  productOverrides: AS_KEYS.productOverrides,
+  customGallery: AS_KEYS.customGallery,
+  coupons: AS_KEYS.coupons
+};
+const ServerSync = {
+  loaded: false,
+  serverKeys: [],
+  localBefore: {}, // cópia do que este navegador tinha antes de sincronizar (usada na migração do painel)
+  apply(state){
+    ServerSync.serverKeys = Object.keys(state);
+    Object.entries(SHARED_KEYS).forEach(([name, lsKey]) => {
+      ServerSync.localBefore[name] = readLS(lsKey, null);
+      if(name in state) writeLS(lsKey, state[name]);
+      else localStorage.removeItem(lsKey);
+    });
+    ServerSync.loaded = true;
+    if(window.refreshCatalog) window.refreshCatalog();
+    if(window.refreshConfig) window.refreshConfig();
+  },
+  async load(){
+    const fresh = location.pathname.includes("/admin") ? "?t=" + Date.now() : "";
+    const data = await Api.request("estado" + fresh, { timeout: 8000 });
+    ServerSync.apply(data.state || {});
+  },
+  /* Envia uma chave para o servidor (somente painel). Retorna Promise. */
+  push(name){
+    const value = readLS(SHARED_KEYS[name], null);
+    return Api.request("estado", { method: "PUT", admin: true, body: { key: name, value } });
+  }
+};
+window.AS_READY = (location.protocol === "file:" ? Promise.resolve() : ServerSync.load())
+  .catch(err => console.warn("Usando dados em cache:", err.message))
+  .then(() => document.dispatchEvent(new CustomEvent("as:data-synced")));
+
+/* Envio de arquivos (artes, fotos). Imagens grandes são reduzidas antes. */
+const FileUpload = {
+  MAX_BYTES: 3 * 1024 * 1024,
+  TYPES: { jpg:"image/jpeg", jpeg:"image/jpeg", png:"image/png", webp:"image/webp", svg:"image/svg+xml", pdf:"application/pdf" },
+  readAsDataURL(blob){
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = () => reject(new Error("Não foi possível ler o arquivo."));
+      r.readAsDataURL(blob);
+    });
+  },
+  async uploadDataURL(dataUrl, name){
+    const [head, data] = String(dataUrl).split(",");
+    const type = (head.match(/^data:([^;]+)/) || [])[1] || "";
+    const res = await Api.request("arquivos", { method: "POST", body: { name, type, data }, timeout: 60000 });
+    return res.file;
+  },
+  async upload(file){
+    const ext = (file.name.split(".").pop() || "").toLowerCase();
+    let type = FileUpload.TYPES[ext];
+    if(!type) throw new Error("Formato não aceito: " + file.name + " (use JPG, PNG, PDF ou SVG).");
+    let dataUrl;
+    if(file.size > FileUpload.MAX_BYTES && ["image/jpeg","image/png","image/webp"].includes(type)){
+      dataUrl = await ImageOptimizer.compressFile(file, 2400, 2400, 0.9);
+    } else if(file.size > FileUpload.MAX_BYTES){
+      throw new Error("Arquivo muito grande (máx. 3 MB): " + file.name + ". Envie pelo WhatsApp.");
+    } else {
+      dataUrl = await FileUpload.readAsDataURL(file);
+      dataUrl = dataUrl.replace(/^data:[^;,]*/, "data:" + type);
+    }
+    return FileUpload.uploadDataURL(dataUrl, file.name);
+  }
+};
+
+/* Registros enviados pelos clientes (contato, ideia, pedido). */
+const Leads = {
+  create(record){ return Api.request("registros", { method: "POST", body: record }); }
+};
+
 /* ---------------------------------- Carrinho ------------------------------- */
 const Cart = {
   get(){ return readLS(AS_KEYS.cart, []); },
@@ -133,46 +240,45 @@ const ORDER_LABELS = {recebido:"Pedido recebido", producao:"Em produção", pron
 /* ---------------------------------- Cupons ----------------------------------- */
 const Coupons = {
   all(){ return readLS(AS_KEYS.coupons, []); },
-  save(list){ writeLS(AS_KEYS.coupons, list); },
+  save(list){ writeLS(AS_KEYS.coupons, list); return ServerSync.push("coupons"); },
   add(code, percent){
     const list = Coupons.all();
     list.push({code:code.toUpperCase(), percent:Number(percent), active:true});
-    Coupons.save(list);
+    return Coupons.save(list);
   },
-  remove(code){ Coupons.save(Coupons.all().filter(c=>c.code!==code)); },
+  remove(code){ return Coupons.save(Coupons.all().filter(c=>c.code!==code)); },
   find(code){ return Coupons.all().find(c=>c.code===String(code).toUpperCase() && c.active); }
 };
 
-/* ---------------------------------- Autenticação do Admin -------------------- */
+/* ---------------------------------- Autenticação do Admin --------------------
+   A senha fica no servidor (com hash). O navegador guarda só um token de sessão. */
 const AdminAuth = {
-  DEFAULT_PASS: "admin123",
-  getPassword(){
-    return readLS(AS_KEYS.adminPass, AdminAuth.DEFAULT_PASS);
-  },
-  login(password){
-    const current = AdminAuth.getPassword();
-    if(password === current){
-      const token = "admin_" + Date.now();
-      sessionStorage.setItem(AS_KEYS.adminSession, token);
+  async login(password){
+    try {
+      const res = await Api.request("admin", { method: "POST", body: { action: "login", password } });
+      sessionStorage.setItem(ADMIN_TOKEN_KEY, res.token);
       return { ok: true };
+    } catch(e) {
+      return { ok: false, error: e.message };
     }
-    return { ok: false, error: "Senha incorreta. Verifique e tente novamente." };
   },
   isAuthenticated(){
-    return !!sessionStorage.getItem(AS_KEYS.adminSession);
+    return !!sessionStorage.getItem(ADMIN_TOKEN_KEY);
   },
   logout(){
-    sessionStorage.removeItem(AS_KEYS.adminSession);
+    sessionStorage.removeItem(ADMIN_TOKEN_KEY);
   },
-  changePassword(currentPass, newPass){
-    if(currentPass !== AdminAuth.getPassword()){
-      return { ok: false, error: "Senha atual incorreta." };
-    }
+  async changePassword(currentPass, newPass){
     if(!newPass || newPass.trim().length < 4){
       return { ok: false, error: "A nova senha deve ter pelo menos 4 caracteres." };
     }
-    writeLS(AS_KEYS.adminPass, newPass.trim());
-    return { ok: true };
+    try {
+      const res = await Api.request("admin", { method: "POST", body: { action: "senha", current: currentPass, next: newPass.trim() } });
+      sessionStorage.setItem(ADMIN_TOKEN_KEY, res.token);
+      return { ok: true };
+    } catch(e) {
+      return { ok: false, error: e.message };
+    }
   }
 };
 
@@ -221,7 +327,7 @@ const CatalogStore = {
 
     if(window.refreshCatalog) window.refreshCatalog(true);
     document.dispatchEvent(new CustomEvent("as:catalog-changed", { detail: { id } }));
-    return productData;
+    return Promise.all([ServerSync.push("customProducts"), ServerSync.push("deletedProducts")]).then(() => productData);
   },
   delete(id){
     // Remove da lista de customizados
@@ -238,6 +344,7 @@ const CatalogStore = {
 
     if(window.refreshCatalog) window.refreshCatalog(true);
     document.dispatchEvent(new CustomEvent("as:catalog-changed", { detail: { id, deleted: true } }));
+    return Promise.all([ServerSync.push("customProducts"), ServerSync.push("deletedProducts")]);
   },
   toggleVisibility(id){
     const overrides = readLS(AS_KEYS.productOverrides, {});
@@ -247,7 +354,7 @@ const CatalogStore = {
     overrides[id] = { ...(overrides[id] || {}), hidden: !currentHidden };
     writeLS(AS_KEYS.productOverrides, overrides);
     if(window.refreshCatalog) window.refreshCatalog(true);
-    return !currentHidden;
+    return ServerSync.push("productOverrides").then(() => !currentHidden);
   },
   toggleFeatured(id){
     const overrides = readLS(AS_KEYS.productOverrides, {});
@@ -257,7 +364,7 @@ const CatalogStore = {
     overrides[id] = { ...(overrides[id] || {}), featured: !currentFeatured };
     writeLS(AS_KEYS.productOverrides, overrides);
     if(window.refreshCatalog) window.refreshCatalog(true);
-    return !currentFeatured;
+    return ServerSync.push("productOverrides").then(() => !currentFeatured);
   },
   duplicate(id){
     const original = CatalogStore.getById(id);
@@ -274,6 +381,7 @@ const CatalogStore = {
     localStorage.removeItem(AS_KEYS.productOverrides);
     if(window.refreshCatalog) window.refreshCatalog(true);
     document.dispatchEvent(new CustomEvent("as:catalog-changed", { detail: { reset: true } }));
+    return Promise.all(["customProducts","deletedProducts","productOverrides"].map(ServerSync.push));
   }
 };
 
@@ -288,18 +396,19 @@ const GalleryStore = {
     current.unshift(item);
     writeLS(AS_KEYS.customGallery, current);
     if(window.refreshCatalog) window.refreshCatalog(true);
-    return current;
+    return ServerSync.push("customGallery");
   },
   remove(index){
     const current = GalleryStore.getAll().slice();
     current.splice(index, 1);
     writeLS(AS_KEYS.customGallery, current);
     if(window.refreshCatalog) window.refreshCatalog(true);
-    return current;
+    return ServerSync.push("customGallery");
   },
   resetToDefaults(){
     localStorage.removeItem(AS_KEYS.customGallery);
     if(window.refreshCatalog) window.refreshCatalog(true);
+    return ServerSync.push("customGallery");
   }
 };
 
@@ -313,12 +422,13 @@ const ConfigStore = {
     writeLS(AS_KEYS.customConfig, customConfig);
     if(window.refreshConfig) window.refreshConfig();
     if(typeof applyContactInfo === "function") applyContactInfo();
-    return window.AS_CONFIG;
+    return ServerSync.push("customConfig").then(() => window.AS_CONFIG);
   },
   resetToDefaults(){
     localStorage.removeItem(AS_KEYS.customConfig);
     if(window.refreshConfig) window.refreshConfig();
     if(typeof applyContactInfo === "function") applyContactInfo();
+    return ServerSync.push("customConfig");
   }
 };
 
@@ -403,7 +513,7 @@ const DataBackup = {
 
       if(window.refreshCatalog) window.refreshCatalog(true);
       if(window.refreshConfig) window.refreshConfig();
-      return { ok: true };
+      return Promise.all(Object.keys(SHARED_KEYS).map(ServerSync.push)).then(() => ({ ok: true }));
     } catch(e) {
       return { ok: false, error: "Arquivo de backup inválido ou corrompido: " + e.message };
     }

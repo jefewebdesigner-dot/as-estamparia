@@ -86,7 +86,7 @@
             <div class="field"><label>Seu nome</label><input type="text" required placeholder="Como podemos te chamar?"></div>
             <div class="field"><label>Nota</label>
               <div class="pill-options" id="rating-picker">
-                ${[1,2,3,4,5].map(n=>`<button type="button" class="pill-opt" data-rating="${n}">${n} ★</button>`).join("")}
+                <button type="button" class="pill-opt" data-rating="1">1 ★</button><button type="button" class="pill-opt" data-rating="2">2 ★</button><button type="button" class="pill-opt" data-rating="3">3 ★</button><button type="button" class="pill-opt" data-rating="4">4 ★</button><button type="button" class="pill-opt selected" data-rating="5">5 ★</button>
               </div>
             </div>
             <div class="field"><label>Comentário</label><textarea rows="3" required placeholder="Conte como foi sua experiência"></textarea></div>
@@ -147,6 +147,8 @@
 <script src="js/store.js"></script>
 <script src="js/ui.js"></script>
 <script>
+// Aguarda os dados do servidor (catálogo, configurações) antes de montar a página.
+window.AS_READY.then(()=>{
 const pid = new URLSearchParams(location.search).get("id") || window.AS_PRODUCTS[0].id;
 const product = getProductById(pid) || window.AS_PRODUCTS[0];
 const cat = getCategory(product.category);
@@ -219,7 +221,6 @@ const colors = Array.isArray(product.colors)
   : defaultColors;
 const hasSizes = sizes.length > 0;
 const hasColors = colors.length > 0;
-let uploadedFiles = [];
 const selection = { model: product.name, size:"", color:"", type:"", approval:true };
 
 let stepNum = 0;
@@ -248,6 +249,14 @@ if(hasColors){
 }
 steps.push(`
   <div class="custom-step">
+    <h4><span class="n">${++stepNum}</span>Quantidade</h4>
+    <div class="qty-picker">
+      <button type="button" id="qty-dec" aria-label="Diminuir quantidade">−</button>
+      <input type="number" id="qty-input" value="1" min="1" max="9999" inputmode="numeric" aria-label="Quantidade">
+      <button type="button" id="qty-inc" aria-label="Aumentar quantidade">+</button>
+    </div>
+  </div>
+  <div class="custom-step">
     <h4><span class="n">${++stepNum}</span>Tipo de personalização</h4>
     <div class="pill-options" id="type-options">
       ${["Foto","Frase / Texto","Nome","Logotipo / Arte própria","Quero ajuda para criar a arte"].map(t=>`<button type="button" class="pill-opt" data-type="${t}">${t}</button>`).join("")}
@@ -258,7 +267,7 @@ steps.push(`
     <label class="upload-zone" id="upload-zone">
       ${Icons.upload}
       <p><strong>Clique para enviar</strong> ou arraste seus arquivos aqui</p>
-      <p style="font-size:.72rem;margin-top:4px;">Aceitamos JPG, PNG, PDF e SVG</p>
+      <p style="font-size:.72rem;margin-top:4px;">Aceitamos JPG, PNG, PDF e SVG — até 3 MB por arquivo (fotos maiores são reduzidas automaticamente)</p>
       <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.pdf,.svg" multiple style="display:none;">
     </label>
     <div class="upload-list" id="upload-list"></div>
@@ -289,37 +298,31 @@ document.querySelectorAll("#type-options .pill-opt").forEach(b=>b.addEventListen
   b.classList.add("selected"); selection.type = b.dataset.type;
 }));
 
-const uploadZone = document.getElementById("upload-zone");
-const fileInput = document.getElementById("file-input");
-uploadZone.addEventListener("click", (e)=>{ e.preventDefault(); fileInput.click(); });
-fileInput.addEventListener("change", ()=>{
-  const allowed = ["image/jpeg","image/png","application/pdf","image/svg+xml"];
-  Array.from(fileInput.files).forEach(f=>{
-    const ext = f.name.split(".").pop().toLowerCase();
-    if(!["jpg","jpeg","png","pdf","svg"].includes(ext)){ toast("Formato não aceito: "+f.name); return; }
-    if(f.size > 15*1024*1024){ toast("Arquivo muito grande (máx. 15MB): "+f.name); return; }
-    uploadedFiles.push(f.name);
-  });
-  renderUploadList();
-  fileInput.value = "";
-});
-function renderUploadList(){
-  document.getElementById("upload-list").innerHTML = uploadedFiles.map((name,i)=>`
-    <span class="upload-chip"><span class="ic">${name.split(".").pop().toUpperCase().slice(0,3)}</span>${name}<button data-remove="${i}">${Icons.close}</button></span>
-  `).join("");
-  document.querySelectorAll("[data-remove]").forEach(btn=>btn.addEventListener("click", ()=>{
-    uploadedFiles.splice(Number(btn.dataset.remove),1); renderUploadList();
-  }));
+const qtyInput = document.getElementById("qty-input");
+function getQty(){
+  const n = Math.floor(Number(qtyInput.value));
+  return Number.isFinite(n) && n >= 1 ? Math.min(n, 9999) : 1;
 }
+document.getElementById("qty-dec").addEventListener("click", ()=>{ qtyInput.value = Math.max(1, getQty() - 1); });
+document.getElementById("qty-inc").addEventListener("click", ()=>{ qtyInput.value = getQty() + 1; });
+qtyInput.addEventListener("change", ()=>{ qtyInput.value = getQty(); });
+
+const artUpload = initUploadZone({
+  zone: document.getElementById("upload-zone"),
+  input: document.getElementById("file-input"),
+  list: document.getElementById("upload-list")
+});
 
 function buildWaMessage(){
   let msg = `Olá! Quero personalizar o produto: *${product.name}*\n`;
+  msg += `Quantidade: ${getQty()}\n`;
   if(selection.size) msg += `Tamanho: ${selection.size}\n`;
   if(selection.color) msg += `Cor: ${selection.color}\n`;
   if(selection.type) msg += `Personalização: ${selection.type}\n`;
   const obs = document.getElementById("obs-field")?.value.trim();
   if(obs) msg += `Observações: ${obs}\n`;
-  if(uploadedFiles.length) msg += `Arquivos que vou enviar: ${uploadedFiles.join(", ")}\n`;
+  const files = artUpload.uploaded();
+  if(files.length) msg += `Arquivos enviados:\n` + files.map(f => `- ${f.name}: ${absoluteUrl(f.url)}`).join("\n") + "\n";
   const approval = document.getElementById("approval-check")?.checked;
   msg += `Aprovação antes da produção: ${approval ? "sim":"não"}\n`;
   msg += `\n(Link do produto: ${location.href})`;
@@ -328,18 +331,20 @@ function buildWaMessage(){
 
 document.getElementById("wa-product-btn").addEventListener("click",(e)=>{
   e.preventDefault();
+  if(artUpload.busy()){ toast("Aguarde o envio dos arquivos terminar."); return; }
   goToWhatsApp(buildWaMessage());
 });
 
 document.getElementById("add-to-cart-btn").addEventListener("click", ()=>{
+  if(artUpload.busy()){ toast("Aguarde o envio dos arquivos terminar."); return; }
   const obs = document.getElementById("obs-field")?.value.trim();
   const approval = document.getElementById("approval-check")?.checked;
   const key = [product.id, selection.size, selection.color, selection.type].join("|");
   Cart.add({
     key, id:product.id, name:product.name, image: product.image || null, icon: product.icon || null,
-    size:selection.size, color:selection.color, type:selection.type, obs, approval, files:[...uploadedFiles], qty:1
+    size:selection.size, color:selection.color, type:selection.type, obs, approval, files:artUpload.uploaded(), qty:getQty()
   });
-  toast("Produto adicionado ao carrinho!", "success");
+  toast(`${getQty()} unidade(s) adicionada(s) ao carrinho!`, "success");
 });
 
 /* ===================== Tabs ===================== */
@@ -396,6 +401,7 @@ document.getElementById("review-form").addEventListener("submit", (e)=>{
 const related = window.AS_PRODUCTS.filter(p=>p.category===product.category && p.id!==product.id).slice(0,4);
 renderGrid(document.getElementById("related-grid"), related.length ? related : window.AS_PRODUCTS.filter(p=>p.id!==product.id).slice(0,4), productCardHTML);
 wireFavButtons();
+});
 </script>
 </body>
 </html>

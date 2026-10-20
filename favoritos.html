@@ -87,6 +87,8 @@
 <script src="js/store.js"></script>
 <script src="js/ui.js"></script>
 <script>
+// Aguarda os dados do servidor (catálogo, configurações) antes de montar a página.
+window.AS_READY.then(()=>{
   function renderFavorites(){
     const ids = Favorites.get();
     const list = window.AS_PRODUCTS.filter(p=>ids.includes(p.id));
@@ -105,6 +107,7 @@
   }
   renderFavorites();
   document.addEventListener("as:favorites-changed", renderFavorites);
+});
 </script>
 </body>
 </html>

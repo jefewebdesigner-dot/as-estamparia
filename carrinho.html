@@ -88,6 +88,8 @@
 <script src="js/store.js"></script>
 <script src="js/ui.js"></script>
 <script>
+// Aguarda os dados do servidor (catálogo, configurações) antes de montar a página.
+window.AS_READY.then(()=>{
   function cartLineMedia(item){
     if(item.image) return `<img src="${item.image}" alt="${item.name}">`;
     return `<div style="width:76px;height:76px;border-radius:12px;border:2px solid var(--ink);overflow:hidden;">${categoryArtSVG(item.icon,76)}</div>`;
@@ -179,6 +181,7 @@
   }
   renderCart();
   document.addEventListener("as:cart-changed", renderCart);
+});
 </script>
 </body>
 </html>

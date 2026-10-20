@@ -62,34 +62,37 @@
         <p style="color:var(--ink-soft);margin-top:14px;">Preencha o formulário com o máximo de detalhes possível. Você também pode anexar uma foto, referência ou logotipo — aceitamos JPG, PNG, PDF e SVG.</p>
 
         <div class="icon-row" style="grid-template-columns:1fr;margin-top:30px;gap:14px;">
-          <div class="icon-item"><div class="ic">${''}</div><h4>1. Conte sua ideia</h4><p>Descreva o produto, a ocasião e o estilo que imagina.</p></div>
-          <div class="icon-item"><div class="ic">${''}</div><h4>2. Nossa equipe responde</h4><p>Conversamos sobre possibilidades, prazo e valores pelo WhatsApp.</p></div>
-          <div class="icon-item"><div class="ic">${''}</div><h4>3. Aprovação e produção</h4><p>Você confere a arte antes de produzirmos, quando aplicável.</p></div>
+          <div class="icon-item"><div class="ic"></div><h4>1. Conte sua ideia</h4><p>Descreva o produto, a ocasião e o estilo que imagina.</p></div>
+          <div class="icon-item"><div class="ic"></div><h4>2. Nossa equipe responde</h4><p>Conversamos sobre possibilidades, prazo e valores pelo WhatsApp.</p></div>
+          <div class="icon-item"><div class="ic"></div><h4>3. Aprovação e produção</h4><p>Você confere a arte antes de produzirmos, quando aplicável.</p></div>
         </div>
       </div>
 
       <form class="card-panel" id="idea-form">
-        <div class="field"><label>Seu nome</label><input type="text" required placeholder="Como podemos te chamar?"></div>
+        <div class="field"><label for="idea-name">Seu nome</label><input type="text" id="idea-name" required placeholder="Como podemos te chamar?" autocomplete="name"></div>
+        <input type="text" name="website" id="idea-website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;">
         <div class="field-row">
-          <div class="field"><label>WhatsApp / telefone</label><input type="tel" required placeholder="(00) 00000-0000"></div>
+          <div class="field"><label for="idea-phone">WhatsApp / telefone</label><input type="tel" id="idea-phone" required placeholder="(00) 00000-0000" autocomplete="tel"></div>
           <div class="field"><label>Produto de interesse</label>
             <select id="idea-category">
               <option value="">Ainda não sei</option>
             </select>
           </div>
         </div>
-        <div class="field"><label>Conte sua ideia</label><textarea rows="4" required placeholder="Ex: quero uma camiseta com a foto do meu cachorro e o nome dele embaixo..."></textarea></div>
+        <div class="field"><label for="idea-text">Conte sua ideia</label><textarea id="idea-text" rows="4" required placeholder="Ex: quero uma camiseta com a foto do meu cachorro e o nome dele embaixo..."></textarea></div>
         <div class="field">
           <label>Anexar referência <span class="hint">(opcional — JPG, PNG, PDF ou SVG)</span></label>
           <label class="upload-zone" id="idea-upload-zone" style="padding:20px;">
-            ${Icons.upload}
-            <p><strong>Clique para enviar</strong> uma foto ou referência</p>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+            <p><strong>Clique para enviar</strong> ou arraste uma foto ou referência</p>
+            <p style="font-size:.72rem;margin-top:4px;">Até 3 MB por arquivo (fotos maiores são reduzidas automaticamente)</p>
             <input type="file" id="idea-file-input" accept=".jpg,.jpeg,.png,.pdf,.svg" multiple style="display:none;">
           </label>
           <div class="upload-list" id="idea-upload-list"></div>
         </div>
-        <label class="checkbox-line" style="margin-bottom:18px;"><input type="checkbox" checked> Quero aprovar a arte antes da produção</label>
-        <button class="btn btn-block btn-lg" type="submit">Tenho Uma Ideia — Enviar pelo WhatsApp</button>
+        <label class="checkbox-line" style="margin-bottom:18px;"><input type="checkbox" id="idea-approval" checked> Quero aprovar a arte antes da produção</label>
+        <div class="form-feedback" id="idea-feedback" role="status" aria-live="polite"></div>
+        <button class="btn btn-block btn-lg" type="submit" id="idea-submit">Tenho Uma Ideia — Enviar</button>
       </form>
     </div>
   </div>
@@ -138,6 +141,8 @@
 <script src="js/store.js"></script>
 <script src="js/ui.js"></script>
 <script>
+// Aguarda os dados do servidor (catálogo, configurações) antes de montar a página.
+window.AS_READY.then(()=>{
   renderGrid(document.getElementById("cats-grid"), window.AS_CATEGORIES, categoryCardHTML);
 
   document.getElementById("idea-category").innerHTML += window.AS_CATEGORIES.map(c=>`<option value="${c.slug}">${c.name}</option>`).join("");
@@ -146,32 +151,50 @@
     el.innerHTML = [Icons.chat, Icons.mail, Icons.check][i];
   });
 
-  let ideaFiles = [];
-  const ideaZone = document.getElementById("idea-upload-zone");
-  const ideaInput = document.getElementById("idea-file-input");
-  ideaZone.addEventListener("click", e=>{ e.preventDefault(); ideaInput.click(); });
-  ideaInput.addEventListener("change", ()=>{
-    Array.from(ideaInput.files).forEach(f=>{
-      const ext = f.name.split(".").pop().toLowerCase();
-      if(!["jpg","jpeg","png","pdf","svg"].includes(ext)){ toast("Formato não aceito: "+f.name); return; }
-      ideaFiles.push(f.name);
-    });
-    document.getElementById("idea-upload-list").innerHTML = ideaFiles.map((n,i)=>`<span class="upload-chip"><span class="ic">${n.split(".").pop().toUpperCase().slice(0,3)}</span>${n}</span>`).join("");
-    ideaInput.value="";
+  const ideaUpload = initUploadZone({
+    zone: document.getElementById("idea-upload-zone"),
+    input: document.getElementById("idea-file-input"),
+    list: document.getElementById("idea-upload-list")
   });
 
-  document.getElementById("idea-form").addEventListener("submit",(e)=>{
+  const ideaForm = document.getElementById("idea-form");
+  const ideaFeedback = document.getElementById("idea-feedback");
+  const ideaSubmit = document.getElementById("idea-submit");
+  ideaForm.addEventListener("submit", async (e)=>{
     e.preventDefault();
-    const inputs = e.target.querySelectorAll("input[type=text], input[type=tel]");
-    const name = inputs[0].value, phone = inputs[1].value;
-    const category = document.getElementById("idea-category").value;
-    const idea = e.target.querySelector("textarea").value;
+    if(ideaUpload.busy()){ toast("Aguarde o envio dos arquivos terminar."); return; }
+    const name = document.getElementById("idea-name").value.trim();
+    const phone = document.getElementById("idea-phone").value.trim();
+    const category = getCategory(document.getElementById("idea-category").value);
+    const idea = document.getElementById("idea-text").value.trim();
+    const approval = document.getElementById("idea-approval").checked;
+    const files = ideaUpload.uploaded();
+
     let msg = `Olá! Tenho uma ideia para personalizar.\nNome: ${name}\nContato: ${phone}\n`;
-    if(category){ const c = getCategory(category); if(c) msg += `Categoria: ${c.name}\n`; }
+    if(category) msg += `Categoria: ${category.name}\n`;
     msg += `Ideia: ${idea}\n`;
-    if(ideaFiles.length) msg += `Arquivos que vou enviar: ${ideaFiles.join(", ")}\n`;
-    goToWhatsApp(msg);
+    msg += `Aprovar arte antes da produção: ${approval ? "sim" : "não"}\n`;
+    if(files.length) msg += `Arquivos enviados:\n` + files.map(f => `- ${f.name}: ${absoluteUrl(f.url)}`).join("\n") + "\n";
+
+    ideaSubmit.disabled = true; ideaSubmit.textContent = "Enviando...";
+    ideaFeedback.className = "form-feedback"; ideaFeedback.textContent = "";
+    try {
+      await saveThenWhatsApp(Leads.create({
+        kind: "ideia", name, phone, subject: category ? category.name : "Ainda não sei",
+        message: idea, data: { approval }, files, website: document.getElementById("idea-website").value
+      }), msg);
+      ideaForm.reset();
+      ideaUpload.clear();
+      ideaFeedback.className = "form-feedback success";
+      ideaFeedback.textContent = "Ideia enviada! Recebemos seus dados e arquivos e vamos responder em breve.";
+    } catch(err) {
+      ideaFeedback.className = "form-feedback error";
+      ideaFeedback.textContent = err.message;
+    } finally {
+      ideaSubmit.disabled = false; ideaSubmit.textContent = "Tenho Uma Ideia — Enviar";
+    }
   });
+});
 </script>
 </body>
 </html>

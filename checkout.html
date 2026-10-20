@@ -89,6 +89,8 @@
 <script src="js/store.js"></script>
 <script src="js/ui.js"></script>
 <script>
+// Aguarda os dados do servidor (catálogo, configurações) antes de montar a página.
+window.AS_READY.then(()=>{
   const items = Cart.get();
   const content = document.getElementById("checkout-content");
 
@@ -159,7 +161,7 @@
       box.innerHTML = `${Icons.truck}<p>Recebemos seu CEP (${cep}). O valor exato do frete será calculado e informado pela nossa equipe junto com o orçamento.</p>`;
     });
 
-    document.getElementById("send-order-btn").addEventListener("click", ()=>{
+    document.getElementById("send-order-btn").addEventListener("click", async (ev)=>{
       const name = document.getElementById("ck-name").value.trim();
       const phone = document.getElementById("ck-phone").value.trim();
       if(!name || !phone){ toast("Preencha nome e WhatsApp para continuar."); return; }
@@ -168,25 +170,47 @@
       const address = document.getElementById("ck-address")?.value.trim();
       const notes = document.getElementById("ck-notes").value.trim();
 
+      // Arquivos antigos do carrinho podem ser só nomes (texto); os novos têm link.
+      const itemFiles = i => (i.files||[]).filter(f => f && typeof f === "object" && f.url);
+      const orderItems = items.map(i=>({name:i.name, qty:i.qty, size:i.size, color:i.color, type:i.type, obs:i.obs, approval:i.approval, files:itemFiles(i)}));
       const order = Orders.create({
         customerName:name, phone, email,
         delivery, address, notes,
-        items: items.map(i=>({name:i.name, qty:i.qty, size:i.size, color:i.color, type:i.type, obs:i.obs}))
+        items: orderItems
       });
 
       let msg = `Olá! Quero finalizar meu pedido AS Estamparia (nº ${order.id}).\nNome: ${name}\nWhatsApp: ${phone}\n`;
       if(email) msg += `E-mail: ${email}\n`;
       msg += `Entrega: ${delivery==="envio" ? "Receber em casa" : "Retirar no local"}\n`;
       if(delivery==="envio" && address) msg += `Endereço: ${address}\n`;
-      msg += `\nItens:\n` + items.map(i=>`- ${i.qty}x ${i.name}${[i.size,i.color,i.type].filter(Boolean).length ? " ("+[i.size,i.color,i.type].filter(Boolean).join(", ")+")" : ""}`).join("\n");
+      msg += `\nItens:\n` + items.map(i=>{
+        let line = `- ${i.qty}x ${i.name}${[i.size,i.color,i.type].filter(Boolean).length ? " ("+[i.size,i.color,i.type].filter(Boolean).join(", ")+")" : ""}`;
+        if(i.obs) line += `\n  Obs: ${i.obs}`;
+        itemFiles(i).forEach(f => { line += `\n  Arquivo: ${f.name} — ${absoluteUrl(f.url)}`; });
+        return line;
+      }).join("\n");
       if(notes) msg += `\n\nObservações: ${notes}`;
 
+      const btn = ev.currentTarget;
+      btn.disabled = true;
+      try {
+        await saveThenWhatsApp(Leads.create({
+          kind: "pedido", name, phone, email, subject: "Pedido " + order.id, message: notes,
+          data: { orderId: order.id, delivery, address, items: orderItems },
+          files: orderItems.flatMap(i => i.files)
+        }), msg);
+      } catch(err) {
+        btn.disabled = false;
+        Orders.delete(order.id);
+        toast("Não foi possível registrar o pedido: " + err.message);
+        return;
+      }
       Cart.clear();
-      goToWhatsApp(msg);
       toast("Pedido registrado! Continue pelo WhatsApp.", "success");
       setTimeout(()=>{ window.location.href = "conta.html?tab=pedidos"; }, 1200);
     });
   }
+});
 </script>
 </body>
 </html>

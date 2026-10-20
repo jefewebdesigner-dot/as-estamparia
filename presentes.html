@@ -115,6 +115,8 @@
 <script src="js/store.js"></script>
 <script src="js/ui.js"></script>
 <script>
+// Aguarda os dados do servidor (catálogo, configurações) antes de montar a página.
+window.AS_READY.then(()=>{
   let activeOccasion = new URLSearchParams(location.search).get("ocasiao") || "";
 
   function renderOccasions(){
@@ -147,6 +149,7 @@
 
   renderOccasions();
   renderGiftGrid();
+});
 </script>
 </body>
 </html>

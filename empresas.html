@@ -84,7 +84,7 @@
         </div>
         <div class="field"><label>Produtos de interesse</label>
           <div class="pill-options" id="biz-products">
-            ${["Camisetas","Uniformes","Canecas","Copos","Ecobags","Bonés","Brindes","Kits para eventos"].map(p=>`<button type="button" class="pill-opt" data-p="${p}">${p}</button>`).join("")}
+            <button type="button" class="pill-opt" data-p="Camisetas">Camisetas</button><button type="button" class="pill-opt" data-p="Uniformes">Uniformes</button><button type="button" class="pill-opt" data-p="Canecas">Canecas</button><button type="button" class="pill-opt" data-p="Copos">Copos</button><button type="button" class="pill-opt" data-p="Ecobags">Ecobags</button><button type="button" class="pill-opt" data-p="Bonés">Bonés</button><button type="button" class="pill-opt" data-p="Brindes">Brindes</button><button type="button" class="pill-opt" data-p="Kits para eventos">Kits para eventos</button>
           </div>
         </div>
         <div class="field"><label>Detalhes do pedido</label><textarea rows="4" placeholder="Conte sobre o evento, prazo desejado, identidade visual, etc."></textarea></div>
@@ -137,6 +137,8 @@
 <script src="js/store.js"></script>
 <script src="js/ui.js"></script>
 <script>
+// Aguarda os dados do servidor (catálogo, configurações) antes de montar a página.
+window.AS_READY.then(()=>{
   document.querySelector('.card-panel .ic').innerHTML = Icons.spark;
 
   const bizCats = window.AS_CATEGORIES.filter(c=>["camisetas","canecas","copos","ecobags","bones","empresas"].includes(c.slug));
@@ -148,8 +150,9 @@
     if(bizSelected.has(b.dataset.p)) bizSelected.delete(b.dataset.p); else bizSelected.add(b.dataset.p);
   }));
 
-  document.getElementById("biz-form").addEventListener("submit", (e)=>{
+  document.getElementById("biz-form").addEventListener("submit", async (e)=>{
     e.preventDefault();
+    const submitBtn = e.target.querySelector("button[type=submit]");
     const inputs = e.target.querySelectorAll("input, textarea");
     const [empresa, responsavel, telefone, quantidade] = [inputs[0].value, inputs[1].value, inputs[2].value, inputs[3].value];
     const detalhes = e.target.querySelector("textarea").value;
@@ -157,8 +160,23 @@
     if(quantidade) msg += `Quantidade estimada: ${quantidade}\n`;
     if(bizSelected.size) msg += `Produtos de interesse: ${[...bizSelected].join(", ")}\n`;
     if(detalhes) msg += `Detalhes: ${detalhes}\n`;
-    goToWhatsApp(msg);
+    if(submitBtn) submitBtn.disabled = true;
+    try {
+      await saveThenWhatsApp(Leads.create({
+        kind: "contato", name: responsavel || empresa, phone: telefone, subject: "Orçamento empresarial",
+        message: detalhes, data: { empresa, quantidade, produtos: [...bizSelected] }
+      }), msg);
+      e.target.reset();
+      document.querySelectorAll("#biz-products .pill-opt").forEach(b=>b.classList.remove("selected"));
+      bizSelected.clear();
+      toast("Pedido de orçamento enviado! Vamos responder em breve.", "success");
+    } catch(err) {
+      toast(err.message);
+    } finally {
+      if(submitBtn) submitBtn.disabled = false;
+    }
   });
+});
 </script>
 </body>
 </html>

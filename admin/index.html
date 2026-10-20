@@ -58,6 +58,7 @@
       <button data-panel="dashboard" class="active">📊 Visão geral</button>
       <button data-panel="produtos">📦 Produtos</button>
       <button data-panel="pedidos">📑 Pedidos</button>
+      <button data-panel="clientes">👥 Clientes / Contatos</button>
       <button data-panel="galeria">🖼️ Galeria</button>
       <button data-panel="cupons">🏷️ Cupons</button>
       <button data-panel="config">⚙️ Configurações</button>
@@ -74,6 +75,7 @@
 
   <!-- ===================== CONTEÚDO PRINCIPAL ===================== -->
   <main class="admin-main">
+    <div class="admin-sync-banner" id="admin-sync-banner" role="status"></div>
     
     <!-- ===================== PAINEL 1: DASHBOARD ===================== -->
     <section class="admin-panel active" id="panel-dashboard">
@@ -118,7 +120,7 @@
             </div>
           </div>
           <div style="margin-top:16px;padding:12px;background:var(--algodao);border:1.5px solid var(--line);border-radius:10px;font-size:.78rem;color:var(--ink-soft);">
-            💡 <b>Dica:</b> Todas as alterações feitas neste painel são salvas e refletidas instantaneamente em todo o site!
+            💡 <b>Dica:</b> As alterações feitas neste painel ficam salvas no servidor e aparecem para todos os clientes em poucos segundos.
           </div>
         </div>
       </div>
@@ -176,6 +178,7 @@
           <h1>Pedidos e Orçamentos</h1>
           <span style="font-size:.85rem;color:var(--ink-soft);">Acompanhe os pedidos gerados pelos clientes pelo carrinho e checkout</span>
         </div>
+        <button class="mini-btn" onclick="loadLeads(true)">↻ Atualizar</button>
       </div>
 
       <div class="table-wrap">
@@ -184,6 +187,25 @@
             <tr>
               <th>Nº</th><th>Cliente</th><th>WhatsApp</th><th>Itens</th><th>Data</th><th>Status</th><th style="text-align:right;">Ação</th>
             </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== PAINEL: CLIENTES / CONTATOS ===================== -->
+    <section class="admin-panel" id="panel-clientes">
+      <div class="admin-head">
+        <div>
+          <h1>Clientes e Contatos</h1>
+          <span style="font-size:.85rem;color:var(--ink-soft);">Mensagens do formulário de contato, ideias de personalização (com arquivos) e orçamentos empresariais</span>
+        </div>
+        <button class="mini-btn" onclick="loadLeads(true)">↻ Atualizar</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="leads-table">
+          <thead>
+            <tr><th>Data</th><th>Origem</th><th>Cliente</th><th>Contato</th><th>Mensagem</th><th>Status</th><th style="text-align:right;">Ação</th></tr>
           </thead>
           <tbody></tbody>
         </table>
@@ -394,33 +416,28 @@
     <form id="product-form" class="admin-modal-body">
       <input type="hidden" id="modal-prod-id">
 
-      <!-- Upload de Foto -->
+      <!-- Fotos do Produto (várias; a primeira é a principal) -->
       <div class="admin-field">
-        <label>Foto do Produto</label>
+        <label>Fotos do Produto</label>
+        <div class="admin-photos" id="modal-photos"></div>
         <div class="image-dropzone" id="prod-dropzone">
-          <input type="file" id="prod-file-input" accept="image/*">
+          <input type="file" id="prod-file-input" accept="image/*" multiple>
           <div class="dropzone-prompt" id="dropzone-prompt">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
             <div>
-              <b>Clique para escolher</b> ou arraste uma foto aqui
-              <div style="font-size:.78rem;color:var(--ink-soft);margin-top:2px;">Suporta fotos da câmera, JPG, PNG e WebP (otimização automática)</div>
+              <b>Clique para adicionar fotos</b> ou arraste aqui (pode escolher várias)
+              <div style="font-size:.78rem;color:var(--ink-soft);margin-top:2px;">A primeira foto é a principal. Use "◀ ▶" para mudar a ordem. JPG, PNG e WebP (otimização automática)</div>
             </div>
-          </div>
-          <div class="image-preview-wrap" id="dropzone-preview" style="display:none;">
-            <img id="preview-img" src="" alt="Prévia">
-            <div class="image-preview-info">
-              <b>Foto selecionada e otimizada</b>
-              <span id="preview-filename">imagem.webp</span>
-            </div>
-            <button type="button" class="mini-btn" style="background:#FFEBEB;color:#A82020;border-color:#E06D6D;" onclick="removeProductImage(event)">Remover</button>
           </div>
         </div>
-        <input type="hidden" id="modal-prod-image">
-        
+
         <div style="margin-top:8px;">
-          <small style="color:var(--ink-soft);cursor:pointer;text-decoration:underline;" onclick="toggleCustomImageUrl()">Ou use um caminho/URL de imagem existente</small>
+          <small style="color:var(--ink-soft);cursor:pointer;text-decoration:underline;" onclick="toggleCustomImageUrl()">Ou adicione um caminho/URL de imagem existente</small>
           <div id="custom-image-url-wrap" style="display:none;margin-top:6px;">
-            <input type="text" id="modal-prod-image-url" placeholder="Ex: assets/caneca-papai.webp">
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="modal-prod-image-url" placeholder="Ex: assets/caneca-papai.webp">
+              <button type="button" class="mini-btn" onclick="addPhotoFromUrl()">Adicionar</button>
+            </div>
           </div>
         </div>
       </div>
@@ -503,7 +520,7 @@
     </form>
     <div class="admin-modal-foot">
       <button type="button" class="mini-btn" onclick="closeProductModal()">Cancelar</button>
-      <button type="button" class="btn" onclick="saveProductModal()">Salvar Produto</button>
+      <button type="button" class="btn" id="save-product-btn" onclick="saveProductModal()">Salvar Produto</button>
     </div>
   </div>
 </div>
@@ -564,6 +581,32 @@ let currentSearchTerm = "";
 let currentCatFilter = "todos";
 let currentStatusFilter = "todos";
 let modalColors = []; // [{ n:"Branco", hex:"#FFFFFF" }]
+let modalPhotos = []; // [{ src:"/api/arquivos?id=...", loading:false }]
+let leadsCache = [];  // contatos, ideias e pedidos vindos do servidor
+
+// Caminho de imagem visto de dentro de /admin/
+function adminSrc(src){
+  if(!src) return "";
+  return /^(data:|https?:|\/)/.test(src) ? src : "../" + src;
+}
+
+function showBanner(type, text){
+  const el = document.getElementById("admin-sync-banner");
+  el.className = "admin-sync-banner show " + type;
+  el.textContent = text;
+}
+
+/* Mostra o resultado de uma gravação no servidor. */
+async function saved(promise, okMsg){
+  try {
+    const result = await promise;
+    if(okMsg) toast(okMsg, "success");
+    return result;
+  } catch(err) {
+    toast("Não foi salvo no servidor: " + err.message, "danger");
+    throw err;
+  }
+}
 
 // 1. Checagem de Autenticação
 function checkAuth(){
@@ -579,10 +622,13 @@ function checkAuth(){
   }
 }
 
-document.getElementById("admin-login-form").addEventListener("submit", (e)=>{
+document.getElementById("admin-login-form").addEventListener("submit", async (e)=>{
   e.preventDefault();
   const pass = document.getElementById("admin-pass-input").value;
-  const res = AdminAuth.login(pass);
+  const btn = e.target.querySelector("button[type=submit]");
+  btn.disabled = true;
+  const res = await AdminAuth.login(pass);
+  btn.disabled = false;
   if(res.ok){
     toast("Login realizado com sucesso!", "success");
     checkAuth();
@@ -592,6 +638,59 @@ document.getElementById("admin-login-form").addEventListener("submit", (e)=>{
     errEl.style.display = "block";
   }
 });
+
+document.addEventListener("as:admin-unauthorized", ()=>{
+  toast("Sua sessão expirou. Entre novamente.");
+  checkAuth();
+});
+
+/* Dados que ficaram salvos só neste navegador (versão antiga do site) são
+   enviados uma única vez ao servidor, para aparecerem para todos os clientes. */
+function hasData(v){
+  if(v === null || v === undefined) return false;
+  if(Array.isArray(v)) return v.length > 0;
+  if(typeof v === "object") return Object.keys(v).length > 0;
+  return true;
+}
+async function migrateLocalData(){
+  // Sem resposta do servidor não dá para saber o que já existe lá: não envia nada.
+  if(!ServerSync.loaded){
+    showBanner("error", "Não foi possível carregar os dados do servidor. Recarregue a página antes de fazer alterações.");
+    return;
+  }
+  const missing = Object.keys(SHARED_KEYS).filter(k => !ServerSync.serverKeys.includes(k) && hasData(ServerSync.localBefore[k]));
+  if(!missing.length) return;
+  showBanner("info", "Enviando para o servidor os dados que estavam salvos só neste navegador...");
+  const uploads = new Map();
+  const ensureUploaded = (src, name) => {
+    if(!src || !String(src).startsWith("data:")) return Promise.resolve(src);
+    if(!uploads.has(src)) uploads.set(src, FileUpload.uploadDataURL(src, name).then(f => f.url));
+    return uploads.get(src);
+  };
+  try {
+    for(const k of missing){
+      let value = ServerSync.localBefore[k];
+      if(k === "customProducts"){
+        value = await Promise.all(value.map(async p => ({
+          ...p,
+          image: await ensureUploaded(p.image, p.id + ".webp"),
+          gallery: await Promise.all((p.gallery || []).map(g => ensureUploaded(g, p.id + ".webp")))
+        })));
+      }
+      if(k === "customGallery"){
+        value = await Promise.all(value.map(async g => ({ ...g, image: await ensureUploaded(g.image, "galeria.webp") })));
+      }
+      writeLS(SHARED_KEYS[k], value);
+      await ServerSync.push(k);
+      ServerSync.serverKeys.push(k);
+    }
+    window.refreshCatalog(true);
+    window.refreshConfig();
+    showBanner("info", "Pronto! Os produtos e configurações que estavam só neste navegador agora estão salvos no servidor e aparecem para todos os clientes.");
+  } catch(err) {
+    showBanner("error", "Não foi possível enviar os dados deste navegador ao servidor: " + err.message + " Recarregue a página para tentar de novo.");
+  }
+}
 
 function handleLogout(){
   AdminAuth.logout();
@@ -610,7 +709,8 @@ function switchTab(panelId){
     p.classList.toggle("active", p.id === "panel-" + panelId);
   });
   if(panelId === "produtos") renderProductsTable();
-  if(panelId === "pedidos") renderOrdersTable();
+  if(panelId === "pedidos") loadLeads();
+  if(panelId === "clientes") loadLeads();
   if(panelId === "galeria") renderGallery();
   if(panelId === "cupons") renderCouponsTable();
   if(panelId === "config") renderConfigForm();
@@ -622,7 +722,8 @@ document.querySelectorAll("#admin-nav button").forEach(btn=>{
 });
 
 // 3. Inicialização de Dados
-function initAdminData(){
+async function initAdminData(){
+  await migrateLocalData();
   renderDashboard();
   initCategoriesSelects();
   renderProductsTable();
@@ -630,6 +731,81 @@ function initAdminData(){
   renderGallery();
   renderCouponsTable();
   renderConfigForm();
+  loadLeads();
+}
+
+// Contatos, ideias e pedidos (servidor)
+async function loadLeads(showToast){
+  try {
+    const res = await Api.request("registros", { admin: true });
+    leadsCache = res.items || [];
+    renderOrdersTable();
+    renderLeadsTable();
+    renderDashboard();
+    if(showToast) toast("Lista atualizada.");
+  } catch(err) {
+    toast("Não foi possível carregar contatos/pedidos: " + err.message, "danger");
+  }
+}
+
+const LEAD_KIND_LABELS = { contato:"Contato", ideia:"Ideia (Personalize)", produto:"Produto", pedido:"Pedido" };
+const LEAD_STATUS = { novo:"Novo", atendido:"Em atendimento", concluido:"Concluído" };
+
+function leadFilesHTML(files){
+  if(!files || !files.length) return "";
+  return `<div class="lead-files">${files.map(f => `<a href="${escapeHTML(f.url)}" target="_blank" rel="noopener">📎 ${escapeHTML(f.name)}</a>`).join("")}</div>`;
+}
+
+function renderLeadsTable(){
+  const list = leadsCache.filter(l => l.kind !== "pedido");
+  const tbody = document.querySelector("#leads-table tbody");
+  if(!list.length){
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--ink-soft);">Nenhum contato recebido ainda.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(l => {
+    const phoneDigits = (l.phone || "").replace(/\D/g, "");
+    return `
+    <tr>
+      <td>${formatDate(l.created_at)}<br><small style="color:var(--ink-soft);">${new Date(l.created_at).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}</small></td>
+      <td><span class="badge">${LEAD_KIND_LABELS[l.kind] || l.kind}</span>${l.subject ? `<br><small style="color:var(--ink-soft);">${escapeHTML(l.subject)}</small>` : ""}</td>
+      <td><b>${escapeHTML(l.name)}</b>${l.data && l.data.empresa ? `<br><small>${escapeHTML(l.data.empresa)}</small>` : ""}</td>
+      <td>
+        ${phoneDigits ? `<a href="https://wa.me/${phoneDigits.length <= 11 ? "55" + phoneDigits : phoneDigits}" target="_blank" style="color:var(--turquesa-escuro);">${escapeHTML(l.phone)}</a>` : "—"}
+        ${l.email ? `<br><a href="mailto:${escapeHTML(l.email)}" style="font-size:.78rem;">${escapeHTML(l.email)}</a>` : ""}
+      </td>
+      <td><div class="lead-msg">${escapeHTML(l.message || "")}</div>${leadFilesHTML(l.files)}</td>
+      <td>
+        <select data-lead-id="${l.id}" class="admin-select" style="padding:4px 8px;font-size:.76rem;">
+          ${Object.entries(LEAD_STATUS).map(([k,v]) => `<option value="${k}" ${k===l.status?'selected':''}>${v}</option>`).join("")}
+        </select>
+      </td>
+      <td style="text-align:right;"><button class="btn-action btn-danger" onclick="deleteLead(${l.id})">Excluir</button></td>
+    </tr>`;
+  }).join("");
+  tbody.querySelectorAll("[data-lead-id]").forEach(sel => {
+    sel.addEventListener("change", () => updateLeadStatus(Number(sel.dataset.leadId), sel.value));
+  });
+}
+
+async function updateLeadStatus(id, status){
+  try {
+    await saved(Api.request("registros", { method: "PATCH", admin: true, body: { id, status } }), "Status atualizado.");
+    const lead = leadsCache.find(l => l.id === id);
+    if(lead) lead.status = status;
+    renderDashboard();
+  } catch(e) { loadLeads(); }
+}
+
+async function deleteLead(id){
+  if(!confirm("Deseja excluir este registro?")) return;
+  try {
+    await saved(Api.request("registros?id=" + id, { method: "DELETE", admin: true }), "Registro excluído.");
+    leadsCache = leadsCache.filter(l => l.id !== id);
+    renderOrdersTable();
+    renderLeadsTable();
+    renderDashboard();
+  } catch(e) {}
 }
 
 function initCategoriesSelects(){
@@ -657,20 +833,21 @@ function renderDashboard(){
   const products = CatalogStore.getAll(true);
   const activeProducts = products.filter(p => !p.hidden).length;
   const featured = products.filter(p => p.featured && !p.hidden).length;
-  const orders = Orders.all();
+  const orders = serverOrders();
   const coupons = Coupons.all().filter(c => c.active).length;
+  const newLeads = leadsCache.filter(l => l.kind !== "pedido" && l.status === "novo").length;
 
   document.getElementById("kpi-row").innerHTML = `
     <div class="kpi-card"><div class="num">${activeProducts}</div><div class="lbl">Produtos Ativos</div></div>
     <div class="kpi-card"><div class="num">${featured}</div><div class="lbl">Em Destaque na Home</div></div>
     <div class="kpi-card"><div class="num">${orders.length}</div><div class="lbl">Pedidos Recebidos</div></div>
-    <div class="kpi-card"><div class="num">${coupons}</div><div class="lbl">Cupons Ativos</div></div>
+    <div class="kpi-card"><div class="num">${newLeads}</div><div class="lbl">Contatos Novos</div></div>
   `;
 
   document.querySelector("#dash-orders-table tbody").innerHTML = orders.slice(0, 5).map(o => `
     <tr>
-      <td><b>${o.id}</b></td>
-      <td>${o.customerName}</td>
+      <td><b>${escapeHTML(o.id)}</b></td>
+      <td>${escapeHTML(o.customerName)}</td>
       <td>${(o.items||[]).length} item(ns)</td>
       <td><span class="order-status ${o.status}">${ORDER_LABELS[o.status] || o.status}</span></td>
       <td>${formatDate(o.date)}</td>
@@ -708,7 +885,7 @@ function renderProductsTable(){
     const isFeatured = !!p.featured;
     const cat = getCategory(p.category);
     const media = p.image
-      ? `<img src="${p.image.startsWith('data:')||p.image.startsWith('http')?p.image:'../'+p.image}" alt="">`
+      ? `<img src="${adminSrc(p.image)}" alt="">`
       : `<div style="width:44px;height:44px;">${categoryArtSVG(p.icon||'gift', 44)}</div>`;
 
     const priceLabel = (p.price && !isNaN(p.price) && Number(p.price) > 0)
@@ -763,35 +940,35 @@ document.getElementById("product-status-filter").addEventListener("change", (e)=
 });
 
 // Ações de Produto
-function toggleProductFeatured(id){
-  CatalogStore.toggleFeatured(id);
+async function toggleProductFeatured(id){
+  const pending = CatalogStore.toggleFeatured(id);
   renderProductsTable();
   renderDashboard();
-  toast("Status de destaque atualizado.");
+  await saved(pending, "Status de destaque atualizado.").catch(()=>{});
 }
 
-function toggleProductVisibility(id){
-  CatalogStore.toggleVisibility(id);
+async function toggleProductVisibility(id){
+  const pending = CatalogStore.toggleVisibility(id);
   renderProductsTable();
   renderDashboard();
-  toast("Visibilidade do produto atualizada.");
+  await saved(pending, "Visibilidade do produto atualizada.").catch(()=>{});
 }
 
-function duplicateProduct(id){
-  CatalogStore.duplicate(id);
+async function duplicateProduct(id){
+  const pending = CatalogStore.duplicate(id);
   renderProductsTable();
   renderDashboard();
-  toast("Produto duplicado com sucesso!", "success");
+  await saved(pending, "Produto duplicado com sucesso!").catch(()=>{});
 }
 
-function deleteProduct(id){
+async function deleteProduct(id){
   const p = CatalogStore.getById(id);
   if(!p) return;
   if(confirm(`Tem certeza que deseja excluir o produto "${p.name}"?`)){
-    CatalogStore.delete(id);
+    const pending = CatalogStore.delete(id);
     renderProductsTable();
     renderDashboard();
-    toast("Produto excluído.", "success");
+    await saved(pending, "Produto excluído.").catch(()=>{});
   }
 }
 
@@ -837,20 +1014,12 @@ function openProductModal(prod = null){
     cb.checked = prodOccasions.includes(cb.value);
   });
 
-  // Imagem
-  const currentImg = prod ? (prod.image || "") : "";
-  document.getElementById("modal-prod-image").value = currentImg;
-  document.getElementById("modal-prod-image-url").value = currentImg.startsWith("data:") ? "" : currentImg;
-  
-  if(currentImg){
-    document.getElementById("preview-img").src = currentImg.startsWith("data:") || currentImg.startsWith("http") ? currentImg : "../" + currentImg;
-    document.getElementById("preview-filename").textContent = "Imagem definida";
-    document.getElementById("dropzone-prompt").style.display = "none";
-    document.getElementById("dropzone-preview").style.display = "flex";
-  } else {
-    document.getElementById("dropzone-prompt").style.display = "flex";
-    document.getElementById("dropzone-preview").style.display = "none";
-  }
+  // Fotos (a primeira é a principal)
+  const photos = prod && Array.isArray(prod.gallery) && prod.gallery.length ? prod.gallery.slice() : (prod && prod.image ? [prod.image] : []);
+  if(prod && prod.image && !photos.includes(prod.image)) photos.unshift(prod.image);
+  modalPhotos = photos.map(src => ({ src, loading:false }));
+  document.getElementById("modal-prod-image-url").value = "";
+  renderModalPhotos();
 
   document.getElementById("product-modal").classList.add("open");
 }
@@ -915,57 +1084,82 @@ document.getElementById("modal-prod-price-type").addEventListener("change", (e)=
   if(isVal) document.getElementById("modal-prod-price-val").focus();
 });
 
-// Dropzone de Produto
+// Fotos do produto: várias, enviadas ao servidor
+function renderModalPhotos(){
+  const box = document.getElementById("modal-photos");
+  box.innerHTML = modalPhotos.map((p, i) => `
+    <div class="admin-photo ${i===0?'main':''} ${p.loading?'loading':''}">
+      ${i===0 ? '<span class="tag">Principal</span>' : ''}
+      <img src="${adminSrc(p.src)}" alt="Foto ${i+1}">
+      <div class="acts">
+        <button type="button" onclick="movePhoto(${i},-1)" ${i===0||p.loading?'disabled':''} title="Mover para a esquerda">◀</button>
+        <button type="button" class="del" onclick="removePhoto(${i})" ${p.loading?'disabled':''} title="Remover">✕</button>
+        <button type="button" onclick="movePhoto(${i},1)" ${i===modalPhotos.length-1||p.loading?'disabled':''} title="Mover para a direita">▶</button>
+      </div>
+    </div>`).join("");
+}
+function movePhoto(i, dir){
+  const j = i + dir;
+  if(j < 0 || j >= modalPhotos.length) return;
+  [modalPhotos[i], modalPhotos[j]] = [modalPhotos[j], modalPhotos[i]];
+  renderModalPhotos();
+}
+function removePhoto(i){
+  modalPhotos.splice(i, 1);
+  renderModalPhotos();
+}
+async function addPhotoFiles(fileList){
+  const files = Array.from(fileList).filter(f => f.type.startsWith("image/"));
+  if(!files.length){ toast("Escolha arquivos de imagem (JPG, PNG ou WebP)."); return; }
+  await Promise.all(files.map(async file => {
+    const entry = { src:"", loading:true };
+    modalPhotos.push(entry);
+    try {
+      const compressed = await ImageOptimizer.compressFile(file, 1400, 1400, 0.85);
+      entry.src = compressed; // prévia enquanto envia
+      renderModalPhotos();
+      const saved = await FileUpload.uploadDataURL(compressed, file.name.replace(/\.[^.]+$/, "") + ".webp");
+      entry.src = saved.url;
+      entry.loading = false;
+    } catch(err) {
+      modalPhotos.splice(modalPhotos.indexOf(entry), 1);
+      toast("Erro ao enviar " + file.name + ": " + err.message, "danger");
+    }
+    renderModalPhotos();
+  }));
+}
+
 const prodDropzone = document.getElementById("prod-dropzone");
 const prodFileInput = document.getElementById("prod-file-input");
-
 prodDropzone.addEventListener("click", (e)=>{
-  if(e.target.closest("button")) return;
+  if(e.target === prodFileInput || e.target.closest("button")) return;
   prodFileInput.click();
 });
-prodFileInput.addEventListener("change", async (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  try {
-    toast("Otimizando imagem...");
-    const compressed = await ImageOptimizer.compressFile(file, 1100, 1100, 0.84);
-    document.getElementById("modal-prod-image").value = compressed;
-    document.getElementById("preview-img").src = compressed;
-    document.getElementById("preview-filename").textContent = file.name + " (" + Math.round(compressed.length/1024) + " KB)";
-    document.getElementById("dropzone-prompt").style.display = "none";
-    document.getElementById("dropzone-preview").style.display = "flex";
-    toast("Foto carregada e otimizada!", "success");
-  } catch(err) {
-    toast("Erro ao processar imagem: " + err.message, "danger");
-  }
+prodFileInput.addEventListener("change", ()=>{
+  addPhotoFiles(prodFileInput.files);
+  prodFileInput.value = "";
 });
-
-function removeProductImage(e){
-  e.stopPropagation();
-  document.getElementById("modal-prod-image").value = "";
-  document.getElementById("modal-prod-image-url").value = "";
-  document.getElementById("prod-file-input").value = "";
-  document.getElementById("dropzone-prompt").style.display = "flex";
-  document.getElementById("dropzone-preview").style.display = "none";
-}
+prodDropzone.addEventListener("dragover", (e)=>{ e.preventDefault(); prodDropzone.classList.add("dragover"); });
+prodDropzone.addEventListener("dragleave", ()=> prodDropzone.classList.remove("dragover"));
+prodDropzone.addEventListener("drop", (e)=>{
+  e.preventDefault(); prodDropzone.classList.remove("dragover");
+  if(e.dataTransfer?.files?.length) addPhotoFiles(e.dataTransfer.files);
+});
 
 function toggleCustomImageUrl(){
   const el = document.getElementById("custom-image-url-wrap");
   el.style.display = el.style.display === "none" ? "block" : "none";
 }
+function addPhotoFromUrl(){
+  const input = document.getElementById("modal-prod-image-url");
+  const val = input.value.trim();
+  if(!val){ toast("Digite o caminho ou URL da imagem."); return; }
+  modalPhotos.push({ src: val, loading:false });
+  input.value = "";
+  renderModalPhotos();
+}
 
-document.getElementById("modal-prod-image-url").addEventListener("input", (e)=>{
-  const val = e.target.value.trim();
-  if(val){
-    document.getElementById("modal-prod-image").value = val;
-    document.getElementById("preview-img").src = val.startsWith("http") ? val : "../" + val;
-    document.getElementById("preview-filename").textContent = "URL: " + val;
-    document.getElementById("dropzone-prompt").style.display = "none";
-    document.getElementById("dropzone-preview").style.display = "flex";
-  }
-});
-
-function saveProductModal(){
+async function saveProductModal(){
   const id = document.getElementById("modal-prod-id").value;
   const name = document.getElementById("modal-prod-name").value.trim();
   if(!name){
@@ -980,7 +1174,9 @@ function saveProductModal(){
 
   const shortDesc = document.getElementById("modal-prod-short").value.trim();
   const description = document.getElementById("modal-prod-desc").value.trim() || shortDesc;
-  const image = document.getElementById("modal-prod-image").value || "";
+  if(modalPhotos.some(p => p.loading)){ toast("Aguarde o envio das fotos terminar."); return; }
+  const gallery = modalPhotos.map(p => p.src).filter(Boolean);
+  const image = gallery[0] || "";
   const featured = document.getElementById("modal-prod-featured").checked;
   const personalizable = document.getElementById("modal-prod-personalizable").checked;
   const isBusiness = document.getElementById("modal-prod-biz").checked;
@@ -1002,7 +1198,7 @@ function saveProductModal(){
     shortDesc,
     description,
     image,
-    gallery: image ? [image] : [],
+    gallery,
     featured,
     personalizable,
     isBusiness,
@@ -1012,16 +1208,40 @@ function saveProductModal(){
     colors
   };
 
-  CatalogStore.save(productData);
-  closeProductModal();
-  renderProductsTable();
-  renderDashboard();
-  toast("Produto salvo com sucesso!", "success");
+  const saveBtn = document.getElementById("save-product-btn");
+  saveBtn.disabled = true; saveBtn.textContent = "Salvando...";
+  try {
+    await saved(CatalogStore.save(productData), "Produto salvo! Já aparece para os clientes.");
+    closeProductModal();
+  } catch(e) {
+    // mensagem já exibida; o modal fica aberto para tentar de novo
+  } finally {
+    saveBtn.disabled = false; saveBtn.textContent = "Salvar Produto";
+    renderProductsTable();
+    renderDashboard();
+  }
 }
 
-// 6. Pedidos
+// 6. Pedidos (registrados no servidor pelo checkout)
+function serverOrders(){
+  return leadsCache.filter(l => l.kind === "pedido").map(l => ({
+    id: (l.data && l.data.orderId) || ("#" + l.id),
+    leadId: l.id,
+    customerName: l.name,
+    phone: l.phone,
+    email: l.email,
+    items: (l.data && l.data.items) || [],
+    delivery: l.data && l.data.delivery,
+    address: l.data && l.data.address,
+    notes: l.message,
+    files: l.files || [],
+    date: l.created_at,
+    status: ORDER_STAGES.includes(l.status) ? l.status : "recebido"
+  }));
+}
+
 function renderOrdersTable(){
-  const orders = Orders.all();
+  const orders = serverOrders();
   const tbody = document.querySelector("#orders-table tbody");
   if(!orders.length){
     tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--ink-soft);">Nenhum pedido recebido ainda.</td></tr>`;
@@ -1030,38 +1250,30 @@ function renderOrdersTable(){
 
   tbody.innerHTML = orders.map(o => `
     <tr>
-      <td><b>${o.id}</b></td>
-      <td>${o.customerName}</td>
-      <td>${o.phone ? `<a href="https://wa.me/${o.phone.replace(/\D/g,'')}" target="_blank" style="color:var(--turquesa-escuro);">${o.phone}</a>` : '—'}</td>
-      <td>${(o.items||[]).map(i => `${i.qty}x ${i.name}`).join(", ")}</td>
+      <td><b>${escapeHTML(o.id)}</b></td>
+      <td>${escapeHTML(o.customerName)}${o.email ? `<br><small>${escapeHTML(o.email)}</small>` : ""}</td>
+      <td>${o.phone ? `<a href="https://wa.me/${(d => d.length <= 11 ? "55" + d : d)(o.phone.replace(/\D/g,''))}" target="_blank" style="color:var(--turquesa-escuro);">${escapeHTML(o.phone)}</a>` : '—'}</td>
+      <td>
+        ${o.items.map(i => `${i.qty}x ${escapeHTML(i.name)}${[i.size,i.color,i.type].filter(Boolean).length ? " (" + [i.size,i.color,i.type].filter(Boolean).map(escapeHTML).join(", ") + ")" : ""}`).join("<br>")}
+        ${o.delivery === "envio" ? `<br><small>🚚 ${escapeHTML(o.address || "Entrega")}</small>` : `<br><small>🏪 Retirada</small>`}
+        ${o.notes ? `<div class="lead-msg">${escapeHTML(o.notes)}</div>` : ""}
+        ${leadFilesHTML(o.files)}
+      </td>
       <td>${formatDate(o.date)}</td>
       <td>
-        <select data-order-id="${o.id}" class="admin-select" style="padding:4px 8px;font-size:.76rem;">
+        <select data-order-id="${o.leadId}" class="admin-select" style="padding:4px 8px;font-size:.76rem;">
           ${ORDER_STAGES.map(s => `<option value="${s}" ${s===o.status?'selected':''}>${ORDER_LABELS[s]}</option>`).join("")}
         </select>
       </td>
       <td style="text-align:right;">
-        <button class="btn-action btn-danger" onclick="deleteOrder('${o.id}')">Excluir</button>
+        <button class="btn-action btn-danger" onclick="deleteLead(${o.leadId})">Excluir</button>
       </td>
     </tr>
   `).join("");
 
   document.querySelectorAll("[data-order-id]").forEach(sel => {
-    sel.addEventListener("change", () => {
-      Orders.updateStatus(sel.dataset.orderId, sel.value);
-      toast("Status do pedido atualizado.");
-      renderDashboard();
-    });
+    sel.addEventListener("change", () => updateLeadStatus(Number(sel.dataset.orderId), sel.value));
   });
-}
-
-function deleteOrder(id){
-  if(confirm("Deseja remover este pedido do histórico?")){
-    Orders.delete(id);
-    renderOrdersTable();
-    renderDashboard();
-    toast("Pedido removido.");
-  }
 }
 
 // 7. Galeria
@@ -1074,12 +1286,12 @@ function renderGallery(){
   }
 
   grid.innerHTML = gallery.map((item, idx) => {
-    const src = item.image.startsWith("data:") || item.image.startsWith("http") ? item.image : "../" + item.image;
+    const src = adminSrc(item.image);
     return `
       <div class="admin-gallery-card">
-        <img src="${src}" alt="${item.caption}">
+        <img src="${src}" alt="${escapeHTML(item.caption)}">
         <div class="body">
-          <p>${item.caption}</p>
+          <p>${escapeHTML(item.caption)}</p>
           <button class="mini-btn" style="background:#FFEBEB;color:#A82020;border-color:#E06D6D;align-self:flex-start;" onclick="deleteGalleryItem(${idx})">
             Remover foto
           </button>
@@ -1103,7 +1315,7 @@ function closeGalleryModal(){
 const galDropzone = document.getElementById("gal-dropzone");
 const galFileInput = document.getElementById("gal-file-input");
 galDropzone.addEventListener("click", (e)=>{
-  if(e.target.closest("button")) return;
+  if(e.target === galFileInput || e.target.closest("button")) return;
   galFileInput.click();
 });
 galFileInput.addEventListener("change", async (e)=>{
@@ -1111,13 +1323,16 @@ galFileInput.addEventListener("change", async (e)=>{
   if(!file) return;
   try {
     toast("Processando imagem...");
-    const compressed = await ImageOptimizer.compressFile(file, 1000, 1000, 0.82);
-    document.getElementById("gal-image-val").value = compressed;
+    const compressed = await ImageOptimizer.compressFile(file, 1200, 1200, 0.84);
     document.getElementById("gal-preview-img").src = compressed;
-    document.getElementById("gal-preview-filename").textContent = file.name;
+    document.getElementById("gal-preview-filename").textContent = file.name + " (enviando...)";
     document.getElementById("gal-dropzone-prompt").style.display = "none";
     document.getElementById("gal-dropzone-preview").style.display = "flex";
+    const savedFile = await FileUpload.uploadDataURL(compressed, file.name.replace(/\.[^.]+$/, "") + ".webp");
+    document.getElementById("gal-image-val").value = savedFile.url;
+    document.getElementById("gal-preview-filename").textContent = file.name;
   } catch(err) {
+    removeGalleryImage({ stopPropagation(){} });
     toast("Erro: " + err.message, "danger");
   }
 });
@@ -1129,7 +1344,7 @@ function removeGalleryImage(e){
   document.getElementById("gal-dropzone-preview").style.display = "none";
 }
 
-function saveGalleryModal(){
+async function saveGalleryModal(){
   const image = document.getElementById("gal-image-val").value;
   const caption = document.getElementById("gal-caption-val").value.trim();
   if(!image){
@@ -1140,17 +1355,18 @@ function saveGalleryModal(){
     toast("Escreva uma legenda.");
     return;
   }
-  GalleryStore.add({ image, caption });
-  closeGalleryModal();
+  try {
+    await saved(GalleryStore.add({ image, caption }), "Foto adicionada à galeria!");
+    closeGalleryModal();
+  } catch(e) {}
   renderGallery();
-  toast("Foto adicionada à galeria!", "success");
 }
 
-function deleteGalleryItem(idx){
+async function deleteGalleryItem(idx){
   if(confirm("Deseja remover esta foto da galeria?")){
-    GalleryStore.remove(idx);
+    const pending = GalleryStore.remove(idx);
     renderGallery();
-    toast("Foto removida.");
+    await saved(pending, "Foto removida.").catch(()=>{});
   }
 }
 
@@ -1174,23 +1390,23 @@ function renderCouponsTable(){
   `).join("");
 }
 
-function removeCoupon(code){
-  Coupons.remove(code);
+async function removeCoupon(code){
+  const pending = Coupons.remove(code);
   renderCouponsTable();
   renderDashboard();
-  toast("Cupom removido.");
+  await saved(pending, "Cupom removido.").catch(()=>{});
 }
 
-document.getElementById("coupon-form").addEventListener("submit", (e)=>{
+document.getElementById("coupon-form").addEventListener("submit", async (e)=>{
   e.preventDefault();
   const code = document.getElementById("new-coupon-code").value.trim();
   const percent = document.getElementById("new-coupon-percent").value;
   if(!code || !percent) return;
-  Coupons.add(code, percent);
+  const pending = Coupons.add(code, percent);
   e.target.reset();
   renderCouponsTable();
   renderDashboard();
-  toast("Cupom cadastrado com sucesso!", "success");
+  await saved(pending, "Cupom cadastrado com sucesso!").catch(()=>{});
 });
 
 // 9. Configurações da Loja
@@ -1221,7 +1437,7 @@ function updateWaPreview(){
 }
 document.getElementById("cfg-whatsapp").addEventListener("input", updateWaPreview);
 
-document.getElementById("store-config-form").addEventListener("submit", (e)=>{
+document.getElementById("store-config-form").addEventListener("submit", async (e)=>{
   e.preventDefault();
   const newConfig = {
     brand: document.getElementById("cfg-brand").value.trim(),
@@ -1236,15 +1452,22 @@ document.getElementById("store-config-form").addEventListener("submit", (e)=>{
     waDefaultMessage: document.getElementById("cfg-wa-msg").value.trim()
   };
 
-  ConfigStore.save(newConfig);
-  toast("Configurações salvas e aplicadas em todo o site!", "success");
+  const btn = e.target.querySelector("button[type=submit]");
+  btn.disabled = true; btn.textContent = "Salvando...";
+  try {
+    await saved(ConfigStore.save(newConfig), "Configurações salvas! Já aparecem para os clientes em todo o site.");
+  } catch(err) {
+    // mensagem de erro já exibida
+  } finally {
+    btn.disabled = false; btn.textContent = "💾 Salvar Configurações da Loja";
+  }
 });
 
-document.getElementById("admin-password-form").addEventListener("submit", (e)=>{
+document.getElementById("admin-password-form").addEventListener("submit", async (e)=>{
   e.preventDefault();
   const current = document.getElementById("pass-current").value;
   const newP = document.getElementById("pass-new").value;
-  const res = AdminAuth.changePassword(current, newP);
+  const res = await AdminAuth.changePassword(current, newP);
   if(res.ok){
     e.target.reset();
     toast("Senha de acesso atualizada com sucesso!", "success");
@@ -1270,8 +1493,10 @@ function handleRestoreBackup(input){
   const file = input.files[0];
   if(!file) return;
   const reader = new FileReader();
-  reader.onload = (e) => {
-    const res = DataBackup.importFullJSON(e.target.result);
+  reader.onload = async (e) => {
+    let res;
+    try { res = await DataBackup.importFullJSON(e.target.result); }
+    catch(err) { res = { ok:false, error:"Backup não foi salvo no servidor: " + err.message }; }
     if(res.ok){
       initAdminData();
       toast("Backup restaurado com sucesso!", "success");
@@ -1307,18 +1532,16 @@ function downloadConfigJS(){
   toast("Arquivo config.js gerado e baixado!", "success");
 }
 
-function handleResetFactory(){
+async function handleResetFactory(){
   if(confirm("⚠️ ATENÇÃO: Deseja realmente restaurar as configurações e catálogo de fábrica? Todas as adições e personalizações locais serão reiniciadas para o padrão inicial.")){
-    CatalogStore.resetToDefaults();
-    GalleryStore.resetToDefaults();
-    ConfigStore.resetToDefaults();
-    initAdminData();
-    toast("Catálogo de fábrica restaurado com sucesso!", "success");
+    const pending = Promise.all([CatalogStore.resetToDefaults(), GalleryStore.resetToDefaults(), ConfigStore.resetToDefaults()]);
+    renderDashboard(); renderProductsTable(); renderGallery(); renderConfigForm();
+    await saved(pending, "Catálogo de fábrica restaurado com sucesso!").catch(()=>{});
   }
 }
 
-// Inicia checando a autenticação
-checkAuth();
+// Inicia (depois de carregar os dados do servidor) checando a autenticação
+window.AS_READY.then(checkAuth);
 </script>
 </body>
 </html>

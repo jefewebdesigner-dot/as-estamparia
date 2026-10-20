@@ -78,7 +78,7 @@
       <div class="hero-benefits"></div>
     </div>
     <div class="hero-art">
-      <img class="hero-products" src="assets/hero-personalizados.png" alt="Caneca branca e ecobag preta personalizadas com a frase Sua marca aqui, em um cenário roxo de estúdio" width="1254" height="1254" fetchpriority="high" decoding="async">
+      <img class="hero-products" src="assets/hero-camiseta-caneca.jpg" alt="Caneca branca e camiseta preta personalizadas com a frase Sua marca aqui, em um cenário roxo de estúdio" width="1254" height="1254" fetchpriority="high" decoding="async">
     </div>
   </div>
   <div class="hero-scroll">Role para descobrir ↓</div>
@@ -312,6 +312,8 @@
 <script src="js/store.js"></script>
 <script src="js/ui.js"></script>
 <script>
+// Aguarda os dados do servidor (catálogo, configurações) antes de montar a página.
+window.AS_READY.then(()=>{
   // Ícones dos benefícios do hero + icon-row (inseridos via JS para reaproveitar o Icons lib)
   document.querySelectorAll(".hero-benefits").forEach(wrap=>{
     wrap.innerHTML = [
@@ -366,6 +368,7 @@
     </div>`).join("");
   initFaq();
   applyContactInfo();
+});
 </script>
 </body>
 </html>
