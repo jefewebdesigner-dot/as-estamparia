@@ -36,6 +36,7 @@ function writeLS(key, value){
 
 /* ---------------------------------- API (servidor) -------------------------- */
 const ADMIN_TOKEN_KEY = "as_admin_token";
+const USER_TOKEN_KEY = "as_user_token";
 const Api = {
   async request(path, { method = "GET", body, admin = false, timeout = 20000 } = {}){
     const ctrl = new AbortController();
@@ -43,6 +44,8 @@ const Api = {
     const headers = {};
     if(body !== undefined) headers["Content-Type"] = "application/json";
     if(admin) headers["x-admin-token"] = sessionStorage.getItem(ADMIN_TOKEN_KEY) || "";
+    const userToken = localStorage.getItem(USER_TOKEN_KEY);
+    if(userToken) headers["x-user-token"] = userToken;
     let res, data;
     try {
       res = await fetch("/api/" + path, { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined, signal: ctrl.signal, cache: "no-store" });
@@ -177,28 +180,40 @@ const Favorites = {
   count(){ return Favorites.get().length; }
 };
 
-/* ---------------------------------- Conta / Usuários ------------------------ */
+/* ---------------------------------- Conta / Usuários ------------------------
+   As contas ficam no servidor; o navegador guarda só o token da sessão e o
+   nome/e-mail para exibir. */
 const Account = {
-  currentUser(){ return readLS(AS_KEYS.account, null); },
+  currentUser(){ return localStorage.getItem(USER_TOKEN_KEY) ? readLS(AS_KEYS.account, null) : null; },
   isLoggedIn(){ return !!Account.currentUser(); },
-  register(name, email, password){
-    const users = readLS(AS_KEYS.users, []);
-    if(users.some(u=>u.email===email)){ return {ok:false, error:"Já existe uma conta com este e-mail."}; }
-    const user = {id:"u_"+Date.now(), name, email, password};
-    users.push(user);
-    writeLS(AS_KEYS.users, users);
-    writeLS(AS_KEYS.account, {id:user.id, name, email});
-    return {ok:true};
+  _start(res){
+    localStorage.setItem(USER_TOKEN_KEY, res.token);
+    writeLS(AS_KEYS.account, res.user);
+    return { ok:true, user:res.user };
   },
-  login(email, password){
-    const users = readLS(AS_KEYS.users, []);
-    const user = users.find(u=>u.email===email && u.password===password);
-    if(!user) return {ok:false, error:"E-mail ou senha inválidos."};
-    writeLS(AS_KEYS.account, {id:user.id, name:user.name, email:user.email});
-    return {ok:true};
+  async register(name, email, password, phone){
+    try { return Account._start(await Api.request("contas", { method:"POST", body:{ action:"cadastro", name, email, password, phone } })); }
+    catch(e) { return { ok:false, error:e.message }; }
   },
-  logout(){ localStorage.removeItem(AS_KEYS.account); }
+  async login(email, password){
+    try { return Account._start(await Api.request("contas", { method:"POST", body:{ action:"login", email, password } })); }
+    catch(e) { return { ok:false, error:e.message }; }
+  },
+  /* Dados e pedidos do cliente logado, direto do servidor. */
+  async fetchAccount(){
+    try {
+      const res = await Api.request("contas");
+      writeLS(AS_KEYS.account, res.user);
+      return res;
+    } catch(e) {
+      if(/sess|Entre novamente/i.test(e.message)) Account.logout();
+      throw e;
+    }
+  },
+  logout(){ localStorage.removeItem(AS_KEYS.account); localStorage.removeItem(USER_TOKEN_KEY); }
 };
+// Contas antigas (salvas só no navegador, com senha em texto) não são mais usadas.
+localStorage.removeItem(AS_KEYS.users);
 
 /* ---------------------------------- Pedidos --------------------------------- */
 const Orders = {

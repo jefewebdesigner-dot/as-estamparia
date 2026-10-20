@@ -3,7 +3,7 @@
    GET ?kind=           → painel: lista registros
    PATCH { id, status } → painel: atualiza status
    DELETE ?id=          → painel: remove */
-import { sql, send, fail, requireAdmin, clip } from "./_lib.js";
+import { sql, send, fail, requireAdmin, clip, customerFromRequest } from "./_lib.js";
 
 const KINDS = ["contato", "ideia", "produto", "pedido"];
 
@@ -26,9 +26,10 @@ export default async function handler(req, res){
       const dataJson = JSON.stringify(data);
       if(dataJson.length > 20000) return send(res, 400, { ok:false, error:"Dados do pedido muito longos." });
 
-      const rows = await sql`insert into as_leads (kind, name, phone, email, subject, message, data, files)
+      const customerId = await customerFromRequest(req); // pedido feito com a conta logada
+      const rows = await sql`insert into as_leads (kind, name, phone, email, subject, message, data, files, customer_id)
         values (${kind}, ${name}, ${phone}, ${clip(b.email, 160)}, ${clip(b.subject, 160)}, ${clip(b.message, 4000)},
-                ${dataJson}::jsonb, ${JSON.stringify(cleanFiles(b.files))}::jsonb)
+                ${dataJson}::jsonb, ${JSON.stringify(cleanFiles(b.files))}::jsonb, ${customerId})
         returning id, created_at`;
       return send(res, 200, { ok:true, id: Number(rows[0].id), createdAt: rows[0].created_at });
     }

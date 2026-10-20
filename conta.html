@@ -98,14 +98,17 @@ window.AS_READY.then(()=>{
         <button data-tab="cadastro">Criar conta</button>
       </div>
       <form class="card-panel" id="login-form">
-        <div class="field"><label>E-mail</label><input type="email" required></div>
-        <div class="field"><label>Senha</label><input type="password" required></div>
+        <div class="field"><label for="lg-email">E-mail</label><input type="email" id="lg-email" required autocomplete="email"></div>
+        <div class="field"><label for="lg-pass">Senha</label><input type="password" id="lg-pass" required autocomplete="current-password"></div>
+        <div class="form-feedback" id="lg-feedback" role="alert"></div>
         <button class="btn btn-block btn-lg" type="submit">Entrar</button>
       </form>
       <form class="card-panel hidden" id="cadastro-form">
-        <div class="field"><label>Nome</label><input type="text" required></div>
-        <div class="field"><label>E-mail</label><input type="email" required></div>
-        <div class="field"><label>Senha</label><input type="password" required minlength="4"></div>
+        <div class="field"><label for="cd-name">Nome</label><input type="text" id="cd-name" required autocomplete="name"></div>
+        <div class="field"><label for="cd-email">E-mail</label><input type="email" id="cd-email" required autocomplete="email"></div>
+        <div class="field"><label for="cd-phone">WhatsApp <span class="hint">(opcional)</span></label><input type="tel" id="cd-phone" autocomplete="tel" placeholder="(00) 00000-0000"></div>
+        <div class="field"><label for="cd-pass">Senha <span class="hint">(mínimo 6 caracteres)</span></label><input type="password" id="cd-pass" required minlength="6" autocomplete="new-password"></div>
+        <div class="form-feedback" id="cd-feedback" role="alert"></div>
         <button class="btn btn-block btn-lg" type="submit">Criar Conta</button>
       </form>
       <div style="text-align:center;margin-top:24px;padding-top:16px;border-top:1px dashed var(--line);">
@@ -120,27 +123,48 @@ window.AS_READY.then(()=>{
         document.getElementById("cadastro-form").classList.toggle("hidden", btn.dataset.tab!=="cadastro");
       });
     });
+    async function submitAccount(form, feedbackId, action, okMsg){
+      const btn = form.querySelector("button[type=submit]");
+      const fb = document.getElementById(feedbackId);
+      btn.disabled = true; fb.className = "form-feedback";
+      const r = await action();
+      btn.disabled = false;
+      if(r.ok){ toast(okMsg, "success"); renderAccount(); }
+      else { fb.className = "form-feedback error"; fb.textContent = r.error; }
+    }
     document.getElementById("login-form").addEventListener("submit",(e)=>{
       e.preventDefault();
-      const [email,pass] = e.target.querySelectorAll("input");
-      const r = Account.login(email.value, pass.value);
-      if(r.ok){ toast("Bem-vindo de volta!","success"); renderAccount(); } else { toast(r.error); }
+      submitAccount(e.target, "lg-feedback",
+        () => Account.login(document.getElementById("lg-email").value.trim(), document.getElementById("lg-pass").value),
+        "Bem-vindo de volta!");
     });
     document.getElementById("cadastro-form").addEventListener("submit",(e)=>{
       e.preventDefault();
-      const [name,email,pass] = e.target.querySelectorAll("input");
-      const r = Account.register(name.value, email.value, pass.value);
-      if(r.ok){ toast("Conta criada com sucesso!","success"); renderAccount(); } else { toast(r.error); }
+      submitAccount(e.target, "cd-feedback",
+        () => Account.register(document.getElementById("cd-name").value.trim(), document.getElementById("cd-email").value.trim(),
+                               document.getElementById("cd-pass").value, document.getElementById("cd-phone").value.trim()),
+        "Conta criada com sucesso!");
     });
   }
 
   function statusIndex(status){ return ORDER_STAGES.indexOf(status); }
 
-  function renderLoggedIn(user){
-    const orders = Orders.mine();
+  async function renderLoggedIn(user){
+    area.innerHTML = `<div class="empty-state"><h3>Carregando sua conta...</h3></div>`;
+    let orders = [];
+    try {
+      const res = await Account.fetchAccount();
+      user = res.user;
+      orders = res.orders.map(o => ({ ...o, status: ORDER_STAGES.includes(o.status) ? o.status : "recebido" }));
+    } catch(err) {
+      if(!Account.isLoggedIn()){ toast(err.message); return renderLoggedOut(); }
+      area.innerHTML = `<div class="empty-state"><h3>Não foi possível carregar sua conta</h3><p>${escapeHTML(err.message)}</p><button class="btn" id="retry-btn">Tentar de novo</button></div>`;
+      document.getElementById("retry-btn").addEventListener("click", renderAccount);
+      return;
+    }
     area.innerHTML = `
       <div class="flex-between" style="margin-bottom:22px;">
-        <div><span class="eyebrow">Olá, ${user.name.split(" ")[0]}</span><h1 style="color:var(--roxo);font-family:var(--font-display);font-size:1.9rem;">Minha conta</h1></div>
+        <div><span class="eyebrow">Olá, ${escapeHTML(user.name.split(" ")[0])}</span><h1 style="color:var(--roxo);font-family:var(--font-display);font-size:1.9rem;">Minha conta</h1></div>
         <button class="btn btn-outline btn-sm" id="logout-btn">Sair</button>
       </div>
       <div class="account-tabs">
@@ -151,17 +175,17 @@ window.AS_READY.then(()=>{
         ${orders.length ? orders.map(o=>`
           <div class="order-card">
             <div class="order-head">
-              <div><strong>Pedido ${o.id}</strong> <span style="color:var(--ink-soft);font-size:.8rem;">— ${formatDate(o.date)}</span></div>
+              <div><strong>Pedido ${escapeHTML(o.id)}</strong> <span style="color:var(--ink-soft);font-size:.8rem;">— ${formatDate(o.date)}</span></div>
               <span class="order-status ${o.status}">${ORDER_LABELS[o.status]}</span>
             </div>
-            <div style="font-size:.86rem;color:var(--ink-soft);">${o.items.map(i=>`${i.qty}x ${i.name}`).join(", ")}</div>
+            <div style="font-size:.86rem;color:var(--ink-soft);">${o.items.map(i=>`${i.qty}x ${escapeHTML(i.name)}`).join(", ")}</div>
             <div class="progress-track">${ORDER_STAGES.map((s,i)=>`<span class="${i<=statusIndex(o.status)?'done':''}"></span>`).join("")}</div>
           </div>`).join("") : `<div class="empty-state"><div class="ic">${Icons.gift||Icons.star}</div><h3>Nenhum pedido ainda</h3><p>Seus pedidos aparecerão aqui depois do checkout.</p><a class="btn" href="produtos.html">Ver Produtos</a></div>`}
       </div>
       <div id="tab-dados" class="hidden">
         <div class="card-panel">
-          <div class="field"><label>Nome</label><input type="text" value="${user.name}" disabled></div>
-          <div class="field"><label>E-mail</label><input type="email" value="${user.email}" disabled></div>
+          <div class="field"><label>Nome</label><input type="text" value="${escapeHTML(user.name)}" disabled></div>
+          <div class="field"><label>E-mail</label><input type="email" value="${escapeHTML(user.email)}" disabled></div>
           <p style="font-size:.8rem;color:var(--ink-soft);">Para alterar seus dados, entre em contato pelo WhatsApp.</p>
         </div>
       </div>

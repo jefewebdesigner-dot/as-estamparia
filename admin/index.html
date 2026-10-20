@@ -27,8 +27,6 @@
       <button class="btn btn-block" type="submit" style="margin-top:10px;">Entrar no Painel</button>
     </form>
     <div style="margin-top:20px;font-size:.78rem;color:var(--ink-soft);">
-      <span>Senha inicial padrão: <code>admin123</code></span>
-      <br><br>
       <a href="../index.html" class="link-arrow" style="font-size:.82rem;">← Voltar à página inicial</a>
     </div>
   </div>
@@ -207,6 +205,14 @@
           <thead>
             <tr><th>Data</th><th>Origem</th><th>Cliente</th><th>Contato</th><th>Mensagem</th><th>Status</th><th style="text-align:right;">Ação</th></tr>
           </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <h2 style="font-size:1.2rem;color:var(--roxo);margin:34px 0 12px;">Clientes cadastrados no site <small id="customers-count" style="color:var(--ink-soft);font-weight:600;font-size:.85rem;"></small></h2>
+      <div class="table-wrap">
+        <table class="data-table" id="customers-table">
+          <thead><tr><th>Cadastro</th><th>Nome</th><th>E-mail</th><th>WhatsApp</th><th>Pedidos</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -739,6 +745,8 @@ async function loadLeads(showToast){
   try {
     const res = await Api.request("registros", { admin: true });
     leadsCache = res.items || [];
+    const customers = await Api.request("contas?lista=1", { admin: true });
+    renderCustomersTable(customers.items || []);
     renderOrdersTable();
     renderLeadsTable();
     renderDashboard();
@@ -746,6 +754,25 @@ async function loadLeads(showToast){
   } catch(err) {
     toast("Não foi possível carregar contatos/pedidos: " + err.message, "danger");
   }
+}
+
+function renderCustomersTable(list){
+  document.getElementById("customers-count").textContent = "(" + list.length + ")";
+  const tbody = document.querySelector("#customers-table tbody");
+  if(!list.length){
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--ink-soft);">Nenhum cliente criou conta ainda.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(c => {
+    const d = (c.phone || "").replace(/\D/g, "");
+    return `<tr>
+      <td>${formatDate(c.created_at)}</td>
+      <td><b>${escapeHTML(c.name)}</b></td>
+      <td><a href="mailto:${escapeHTML(c.email)}">${escapeHTML(c.email)}</a></td>
+      <td>${d ? `<a href="https://wa.me/${d.length <= 11 ? "55" + d : d}" target="_blank" style="color:var(--turquesa-escuro);">${escapeHTML(c.phone)}</a>` : "—"}</td>
+      <td>${c.pedidos}</td>
+    </tr>`;
+  }).join("");
 }
 
 const LEAD_KIND_LABELS = { contato:"Contato", ideia:"Ideia (Personalize)", produto:"Produto", pedido:"Pedido" };

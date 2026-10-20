@@ -32,6 +32,18 @@ create table if not exists as_leads (
 );
 create index if not exists as_leads_kind_created on as_leads (kind, created_at desc);
 
--- Permissões do usuário usado pelo site em produção
-grant select, insert, update, delete on as_kv, as_files, as_leads to gravity_runtime_app;
-grant usage, select on sequence as_leads_id_seq to gravity_runtime_app;
+
+-- Contas de clientes (Minha conta)
+create table if not exists as_customers (
+  id bigserial primary key,
+  name text not null,
+  email text not null unique,         -- sempre em minúsculas
+  phone text,
+  salt text not null,
+  hash text not null,
+  created_at timestamptz not null default now()
+);
+alter table as_leads add column if not exists customer_id bigint references as_customers(id) on delete set null;
+create index if not exists as_leads_customer on as_leads (customer_id, created_at desc);
+
+-- Permissões: aplicadas por db/migrate.mjs para o usuário de DATABASE_URL.

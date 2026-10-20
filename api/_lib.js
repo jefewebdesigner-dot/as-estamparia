@@ -59,6 +59,41 @@ export async function requireAdmin(req, res){
   return ok;
 }
 
+/* ---------------- Sessão de clientes (Minha conta) ---------------- */
+const CUSTOMER_SESSION_DAYS = 30;
+
+async function sessionSecret(){
+  const rows = await sql`select value from as_kv where key = 'session_secret'`;
+  if(rows.length) return rows[0].value.secret;
+  const secret = crypto.randomBytes(32).toString("hex");
+  await sql`insert into as_kv (key, value) values ('session_secret', ${JSON.stringify({ secret })}::jsonb) on conflict (key) do nothing`;
+  const saved = await sql`select value from as_kv where key = 'session_secret'`;
+  return saved[0].value.secret;
+}
+
+export function customerHash(password, salt){
+  return hashPassword(password, salt);
+}
+
+export async function customerToken(id){
+  const payload = Buffer.from(JSON.stringify({ id:Number(id), exp: Date.now() + CUSTOMER_SESSION_DAYS * 864e5 })).toString("base64url");
+  const sig = crypto.createHmac("sha256", await sessionSecret()).update(payload).digest("base64url");
+  return payload + "." + sig;
+}
+
+/* Retorna o id do cliente logado (header x-user-token) ou null. */
+export async function customerFromRequest(req){
+  const token = String(req.headers["x-user-token"] || "");
+  const [payload, sig] = token.split(".");
+  if(!payload || !sig) return null;
+  const expected = crypto.createHmac("sha256", await sessionSecret()).update(payload).digest("base64url");
+  if(sig.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) return null;
+  try {
+    const data = JSON.parse(Buffer.from(payload, "base64url").toString());
+    return data.exp > Date.now() ? Number(data.id) : null;
+  } catch(e) { return null; }
+}
+
 export function clip(value, max){
   if(value === undefined || value === null) return "";
   return String(value).trim().slice(0, max);
