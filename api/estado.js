@@ -11,7 +11,7 @@ export default async function handler(req, res){
       const rows = await sql`select key, value from as_kv where key = any(${KEYS})`;
       const state = {};
       rows.forEach(r => { state[r.key] = r.value; });
-      res.setHeader("Cache-Control", "public, max-age=0, s-maxage=5, stale-while-revalidate=30");
+      res.setHeader("Cache-Control", "public, max-age=0, s-maxage=5, stale-while-revalidate=10");
       return send(res, 200, { ok:true, state });
     }
 

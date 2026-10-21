@@ -905,6 +905,7 @@ html, body{overflow-x:hidden;}
 .admin-photo .acts button{flex:1;border:1px solid var(--line);background:var(--algodao);border-radius:6px;font-size:.72rem;padding:4px 0;cursor:pointer;}
 .admin-photo .acts button:disabled{opacity:.35;cursor:default;}
 .admin-photo .acts button.del{color:#A82020;}
+.admin-photo .acts button.star{color:#B8860B;}
 .admin-photo.loading img{opacity:.4;}
 
 /* Lista de contatos/clientes no painel */

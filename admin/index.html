@@ -432,7 +432,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
             <div>
               <b>Clique para adicionar fotos</b> ou arraste aqui (pode escolher várias)
-              <div style="font-size:.78rem;color:var(--ink-soft);margin-top:2px;">A primeira foto é a principal. Use "◀ ▶" para mudar a ordem. JPG, PNG e WebP (otimização automática)</div>
+              <div style="font-size:.78rem;color:var(--ink-soft);margin-top:2px;">Fotos novas entram como <b>principal</b> (a que aparece no catálogo e na página inicial). Use "★" para escolher outra principal e "◀ ▶" para a ordem. JPG, PNG e WebP.</div>
             </div>
           </div>
         </div>
@@ -609,6 +609,8 @@ async function saved(promise, okMsg){
     if(okMsg) toast(okMsg, "success");
     return result;
   } catch(err) {
+    // Aviso fixo (não some sozinho): a alteração NÃO chegou ao site.
+    showBanner("error", "Atenção: a última alteração NÃO foi salva no servidor e não aparece no site. Motivo: " + err.message + " Entre novamente e repita a alteração.");
     toast("Não foi salvo no servidor: " + err.message, "danger");
     throw err;
   }
@@ -1119,6 +1121,7 @@ function renderModalPhotos(){
       ${i===0 ? '<span class="tag">Principal</span>' : ''}
       <img src="${adminSrc(p.src)}" alt="Foto ${i+1}">
       <div class="acts">
+        ${i>0 ? `<button type="button" class="star" onclick="makeMainPhoto(${i})" ${p.loading?'disabled':''} title="Tornar principal">★</button>` : ''}
         <button type="button" onclick="movePhoto(${i},-1)" ${i===0||p.loading?'disabled':''} title="Mover para a esquerda">◀</button>
         <button type="button" class="del" onclick="removePhoto(${i})" ${p.loading?'disabled':''} title="Remover">✕</button>
         <button type="button" onclick="movePhoto(${i},1)" ${i===modalPhotos.length-1||p.loading?'disabled':''} title="Mover para a direita">▶</button>
@@ -1131,6 +1134,11 @@ function movePhoto(i, dir){
   [modalPhotos[i], modalPhotos[j]] = [modalPhotos[j], modalPhotos[i]];
   renderModalPhotos();
 }
+function makeMainPhoto(i){
+  const [p] = modalPhotos.splice(i, 1);
+  modalPhotos.unshift(p);
+  renderModalPhotos();
+}
 function removePhoto(i){
   modalPhotos.splice(i, 1);
   renderModalPhotos();
@@ -1138,9 +1146,12 @@ function removePhoto(i){
 async function addPhotoFiles(fileList){
   const files = Array.from(fileList).filter(f => f.type.startsWith("image/"));
   if(!files.length){ toast("Escolha arquivos de imagem (JPG, PNG ou WebP)."); return; }
+  // Fotos novas entram no começo: a primeira vira a principal do produto,
+  // que é a que aparece no catálogo, na página inicial e no carrinho.
+  let insertAt = 0;
   await Promise.all(files.map(async file => {
     const entry = { src:"", loading:true };
-    modalPhotos.push(entry);
+    modalPhotos.splice(insertAt++, 0, entry);
     try {
       const compressed = await ImageOptimizer.compressFile(file, 1400, 1400, 0.85);
       entry.src = compressed; // prévia enquanto envia
